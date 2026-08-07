@@ -1,0 +1,1187 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="description" content="Scout de futsal: registro por jogador, campograma, relatorio da partida e exportacao. Funciona sem internet.">
+<meta name="color-scheme" content="light dark">
+<meta name="theme-color" content="#0A1214">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Scout Futsal">
+<link rel="manifest" href="./manifest.webmanifest">
+<link rel="icon" href="./icons/icon-192.png">
+<link rel="apple-touch-icon" href="./icons/icon-180.png">
+<title>Scout Futsal</title>
+</head>
+<body>
+<title>Futsal Scouting</title>
+<style>
+  :root{
+    --paper:#EDF0EE; --surface:#FFFFFF; --surface-2:#F5F7F5;
+    --ink:#0C1618; --muted:#5A6B6C; --line:#D2DAD8; --line-soft:#E3E9E7;
+    --accent:#0B6E5F; --accent-ink:#FFFFFF; --accent-soft:#DCEBE7;
+    --gol:#E4572E; --amarelo:#C88A05; --vermelho:#BE3B2E; --neg:#7C8A8C;
+    --shadow:0 1px 2px rgba(12,22,24,.06), 0 6px 20px rgba(12,22,24,.06);
+    --r:12px;
+    --ui:-apple-system,BlinkMacSystemFont,"Segoe UI",system-ui,Roboto,sans-serif;
+    --num:ui-monospace,"SF Mono",Menlo,"Roboto Mono",Consolas,monospace;
+  }
+  @media (prefers-color-scheme:dark){
+    :root{
+      --paper:#0A1214; --surface:#121D1F; --surface-2:#182528;
+      --ink:#E6ECEA; --muted:#8FA2A3; --line:#243133; --line-soft:#1C282B;
+      --accent:#19A98F; --accent-ink:#04120F; --accent-soft:#14332E;
+      --gol:#FF7A52; --amarelo:#E7B23C; --vermelho:#E2685A; --neg:#6E7F81;
+      --shadow:0 1px 2px rgba(0,0,0,.4), 0 8px 24px rgba(0,0,0,.35);
+    }
+  }
+  :root[data-theme="dark"]{
+    --paper:#0A1214; --surface:#121D1F; --surface-2:#182528;
+    --ink:#E6ECEA; --muted:#8FA2A3; --line:#243133; --line-soft:#1C282B;
+    --accent:#19A98F; --accent-ink:#04120F; --accent-soft:#14332E;
+    --gol:#FF7A52; --amarelo:#E7B23C; --vermelho:#E2685A; --neg:#6E7F81;
+    --shadow:0 1px 2px rgba(0,0,0,.4), 0 8px 24px rgba(0,0,0,.35);
+  }
+  :root[data-theme="light"]{
+    --paper:#EDF0EE; --surface:#FFFFFF; --surface-2:#F5F7F5;
+    --ink:#0C1618; --muted:#5A6B6C; --line:#D2DAD8; --line-soft:#E3E9E7;
+    --accent:#0B6E5F; --accent-ink:#FFFFFF; --accent-soft:#DCEBE7;
+    --gol:#E4572E; --amarelo:#C88A05; --vermelho:#BE3B2E; --neg:#7C8A8C;
+    --shadow:0 1px 2px rgba(12,22,24,.06), 0 6px 20px rgba(12,22,24,.06);
+  }
+
+  *{box-sizing:border-box}
+  body{
+    margin:0; background:var(--paper); color:var(--ink);
+    font-family:var(--ui); font-size:16px; line-height:1.45;
+    -webkit-text-size-adjust:100%; -webkit-tap-highlight-color:transparent;
+  }
+  button,input,select{font:inherit;color:inherit;touch-action:manipulation}
+  .num{font-family:var(--num);font-variant-numeric:tabular-nums}
+
+  /* ---------- shell ---------- */
+  .wrap{max-width:1120px;margin:0 auto;padding:0 14px 96px}
+
+  header.board{
+    position:sticky;top:0;z-index:30;background:var(--surface);
+    border-bottom:1px solid var(--line);
+  }
+  .board-in{max-width:1120px;margin:0 auto;padding:10px 14px;
+    display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+  .score{display:flex;align-items:center;gap:12px}
+  .side{display:flex;flex-direction:column;min-width:0}
+  .side input{
+    background:transparent;border:0;padding:0;font-weight:650;font-size:14px;
+    letter-spacing:.01em;max-width:150px;min-width:60px;
+  }
+  .side input:focus{outline:2px solid var(--accent);outline-offset:2px;border-radius:4px}
+  .side .lbl{font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+  .digits{font-family:var(--num);font-size:34px;font-weight:700;letter-spacing:-.02em;line-height:1}
+  .vs{color:var(--muted);font-size:20px;font-weight:600}
+  .clock{margin-left:auto;display:flex;align-items:center;gap:8px}
+  .clock .t{font-family:var(--num);font-size:24px;font-weight:650;letter-spacing:-.01em}
+  .chipbtn{
+    border:1px solid var(--line);background:var(--surface-2);border-radius:999px;
+    padding:7px 13px;font-size:13px;font-weight:600;cursor:pointer;
+  }
+  .chipbtn:active{transform:scale(.96)}
+  .chipbtn.on{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+
+  nav.tabs{position:sticky;top:var(--tabtop,61px);z-index:29;background:var(--paper);
+    border-bottom:1px solid var(--line-soft)}
+  .tabs-in{max-width:1120px;margin:0 auto;padding:0 8px;display:flex;gap:2px;overflow-x:auto;
+    scrollbar-width:none}
+  .tabs-in::-webkit-scrollbar{display:none}
+  .tab{
+    border:0;background:transparent;padding:13px 12px 11px;font-size:13.5px;font-weight:600;
+    color:var(--muted);cursor:pointer;white-space:nowrap;border-bottom:2.5px solid transparent;
+  }
+  .tab[aria-selected="true"]{color:var(--ink);border-bottom-color:var(--accent)}
+
+  section[hidden]{display:none}
+  h2.sec{font-size:12px;letter-spacing:.15em;text-transform:uppercase;color:var(--muted);
+    margin:26px 0 10px;font-weight:700}
+  .card{background:var(--surface);border:1px solid var(--line-soft);border-radius:var(--r);
+    box-shadow:var(--shadow)}
+
+  /* ---------- roster chips ---------- */
+  .roster{display:flex;gap:8px;overflow-x:auto;padding:12px 2px;scrollbar-width:none;
+    position:sticky;top:calc(var(--tabtop,61px) + 45px);background:var(--paper);z-index:28}
+  .roster::-webkit-scrollbar{display:none}
+  .pchip{
+    flex:0 0 auto;display:flex;align-items:center;gap:8px;padding:8px 14px 8px 8px;
+    background:var(--surface);border:1px solid var(--line);border-radius:999px;cursor:pointer;
+  }
+  .pchip .n{font-family:var(--num);font-weight:700;font-size:15px;background:var(--surface-2);
+    border-radius:999px;width:30px;height:30px;display:grid;place-items:center}
+  .pchip .nm{font-size:14px;font-weight:600;max-width:130px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .pchip.gk .n{background:var(--amarelo);color:#fff}
+  .pchip[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+  .pchip[aria-pressed="true"] .n{background:rgba(255,255,255,.22);color:inherit}
+  .pchip[aria-pressed="true"].gk .n{background:var(--amarelo);color:#12100a}
+
+  /* ---------- action grid ---------- */
+  .grid{display:grid;gap:8px;grid-template-columns:repeat(auto-fill,minmax(104px,1fr))}
+  .act{
+    position:relative;display:flex;flex-direction:column;justify-content:space-between;
+    min-height:88px;padding:10px;border-radius:var(--r);cursor:pointer;text-align:left;
+    background:var(--surface);border:1px solid var(--line);box-shadow:var(--shadow);
+    transition:transform .07s ease;
+  }
+  .act:active{transform:scale(.96)}
+  .act .code{font-family:var(--num);font-size:19px;font-weight:700;letter-spacing:-.01em}
+  .act .desc{font-size:11px;line-height:1.25;color:var(--muted);font-weight:500}
+  .act .cnt{position:absolute;top:8px;right:10px;font-family:var(--num);font-size:22px;
+    font-weight:700;color:var(--muted)}
+  .act[data-has="1"] .cnt{color:var(--ink)}
+  .act[data-kind="pos"]{border-left:3px solid var(--accent)}
+  .act[data-kind="neg"]{border-left:3px solid var(--neg)}
+  .act[data-kind="gol"]{border-left:3px solid var(--gol)}
+  .act[data-kind="ca"]{border-left:3px solid var(--amarelo)}
+  .act[data-kind="cv"]{border-left:3px solid var(--vermelho)}
+  .act[data-kind="free"]{border-left:3px dashed var(--line)}
+  .act.flash{animation:pop .35s ease}
+  @keyframes pop{0%{background:var(--accent-soft)}100%{background:var(--surface)}}
+  @media (prefers-reduced-motion:reduce){.act,.act.flash{transition:none;animation:none}}
+
+  .bar{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin:14px 0}
+  .btn{border:1px solid var(--line);background:var(--surface);border-radius:10px;
+    padding:10px 15px;font-size:14px;font-weight:600;cursor:pointer}
+  .btn:active{transform:scale(.97)}
+  .btn.primary{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+  .btn.danger{color:var(--vermelho);border-color:var(--vermelho)}
+  .btn:disabled{opacity:.4;cursor:default}
+  .hint{font-size:12.5px;color:var(--muted)}
+
+  /* ---------- tables ---------- */
+  .tw{overflow-x:auto;border-radius:var(--r);border:1px solid var(--line-soft);background:var(--surface)}
+  table{border-collapse:collapse;width:100%;font-size:13.5px}
+  th,td{padding:8px 9px;text-align:right;white-space:nowrap;border-bottom:1px solid var(--line-soft)}
+  th{font-size:10.5px;letter-spacing:.09em;text-transform:uppercase;color:var(--muted);
+    font-weight:700;position:sticky;top:0;background:var(--surface-2)}
+  td.l,th.l{text-align:left}
+  tbody tr:last-child td{border-bottom:0}
+  tr.tot td{font-weight:700;background:var(--surface-2)}
+  td.num,th.num{font-family:var(--num);font-variant-numeric:tabular-nums}
+  td.z{color:var(--muted)}
+
+  /* ---------- team / report ---------- */
+  .rep{display:grid;gap:1px;background:var(--line-soft);border-radius:var(--r);overflow:hidden;
+    border:1px solid var(--line-soft)}
+  .rep .row{display:grid;grid-template-columns:1fr auto 1fr;background:var(--surface);
+    align-items:center;padding:11px 14px;gap:10px}
+  .rep .row .k{text-align:center;font-size:11px;letter-spacing:.1em;text-transform:uppercase;
+    color:var(--muted);font-weight:700}
+  .rep .row .a{text-align:right}.rep .row .b{text-align:left}
+  .rep .v{font-family:var(--num);font-size:20px;font-weight:700}
+  .rep .row.head{background:var(--surface-2)}
+
+  /* ---------- pitch ---------- */
+  .pitchwrap{background:var(--surface);border:1px solid var(--line-soft);border-radius:var(--r);
+    padding:10px;box-shadow:var(--shadow)}
+  svg.pitch{width:100%;height:auto;display:block;touch-action:manipulation}
+  .modes{display:flex;gap:8px;flex-wrap:wrap;margin:12px 0}
+  .mode{border:1px solid var(--line);background:var(--surface);border-radius:999px;
+    padding:9px 15px;font-size:14px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:7px}
+  .mode .dot{width:11px;height:11px;border-radius:50%}
+  .mode[aria-pressed="true"]{border-color:var(--ink);box-shadow:0 0 0 1.5px var(--ink) inset}
+
+  /* ---------- plantel ---------- */
+  .plist{display:grid;gap:8px}
+  .prow{display:grid;grid-template-columns:64px 1fr auto auto;gap:8px;align-items:center;
+    background:var(--surface);border:1px solid var(--line-soft);border-radius:10px;padding:8px 10px}
+  .prow input[type=text],.prow input[type=number]{
+    width:100%;background:var(--surface-2);border:1px solid var(--line);border-radius:8px;
+    padding:9px 10px;font-size:15px}
+  .prow input[type=number]{font-family:var(--num);text-align:center}
+  .gkt{border:1px solid var(--line);border-radius:8px;padding:8px 11px;font-size:12.5px;
+    font-weight:700;letter-spacing:.06em;cursor:pointer;background:var(--surface-2);color:var(--muted)}
+  .gkt[aria-pressed="true"]{background:var(--amarelo);border-color:var(--amarelo);color:#12100a}
+  .del{border:0;background:transparent;color:var(--muted);font-size:20px;cursor:pointer;padding:4px 8px}
+
+  /* ---------- log ---------- */
+  .log{max-height:340px;overflow:auto;border:1px solid var(--line-soft);border-radius:var(--r);
+    background:var(--surface)}
+  .logrow{display:grid;grid-template-columns:64px 46px 1fr auto;gap:10px;align-items:center;
+    padding:9px 12px;border-bottom:1px solid var(--line-soft);font-size:13.5px}
+  .logrow:last-child{border-bottom:0}
+  .logrow .tm{font-family:var(--num);color:var(--muted);font-size:12.5px}
+  .logrow .cd{font-family:var(--num);font-weight:700}
+
+  /* ---------- compare ---------- */
+  .cmp{display:grid;gap:6px}
+  .cmprow{display:grid;grid-template-columns:52px 1fr 60px 1fr 52px;gap:8px;align-items:center;
+    font-size:13px}
+  .cmprow .k{text-align:center;font-size:10.5px;letter-spacing:.09em;text-transform:uppercase;
+    color:var(--muted);font-weight:700}
+  .cmprow .v{font-family:var(--num);font-weight:700;font-size:15px}
+  .cmprow .v.a{text-align:right}.cmprow .v.b{text-align:left}
+  .track{height:9px;background:var(--surface-2);border-radius:999px;overflow:hidden;display:flex}
+  .track.a{justify-content:flex-end}
+  .track i{display:block;height:100%;background:var(--accent);border-radius:999px}
+  .track.b i{background:var(--gol)}
+
+  select{background:var(--surface);border:1px solid var(--line);border-radius:10px;
+    padding:10px 12px;font-size:15px;font-weight:600}
+  .selrow{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:14px}
+
+  .legend{font-size:12.5px;color:var(--muted);line-height:1.7;
+    background:var(--surface-2);border-radius:var(--r);padding:14px 16px;border:1px solid var(--line-soft)}
+  .legend b{color:var(--ink);font-family:var(--num)}
+
+  .toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%) translateY(20px);
+    background:var(--ink);color:var(--paper);padding:11px 18px;border-radius:999px;font-size:14px;
+    font-weight:600;opacity:0;pointer-events:none;transition:.2s ease;z-index:60}
+  .toast.on{opacity:1;transform:translateX(-50%) translateY(0)}
+
+  :focus-visible{outline:2.5px solid var(--accent);outline-offset:2px}
+
+  /* ---------- cabeçalho de impressão ---------- */
+  .printonly{display:none}
+  #printHead h1{font-size:20px;margin:0 0 2px;font-weight:700}
+  #printHead .sub{font-size:12.5px;color:var(--muted)}
+
+  /* ---------- impressão / PDF ---------- */
+  @media print{
+    @page{margin:12mm}
+    html,body{background:#fff;color:#000}
+    header.board, nav.tabs, .bar, .roster, .toast{display:none !important}
+    .wrap{padding:0;max-width:none}
+    .printonly{display:block;margin:0 0 14px}
+    .card,.rep,.tw,.pitchwrap{box-shadow:none}
+    .rep,.tw{border-color:#bbb}
+    .rep .row{break-inside:avoid}
+    h2.sec{margin:16px 0 8px}
+  }
+</style>
+
+<header class="board">
+  <div class="board-in">
+    <div class="score">
+      <div class="side" style="align-items:flex-end">
+        <span class="lbl">Nossa equipe</span>
+        <input id="teamName" style="text-align:right" value="Minha equipe" aria-label="Nome da nossa equipe">
+      </div>
+      <span class="digits" id="scoreUs">0</span>
+      <span class="vs">×</span>
+      <span class="digits" id="scoreThem">0</span>
+      <div class="side">
+        <span class="lbl">Adversário</span>
+        <input id="oppName" value="Adversário" aria-label="Nome do adversário">
+      </div>
+    </div>
+    <div class="clock">
+      <button class="chipbtn" id="periodBtn" title="Alternar tempo">1º T</button>
+      <span class="t num" id="clockT">00:00</span>
+      <button class="chipbtn" id="clockBtn">Iniciar</button>
+    </div>
+  </div>
+</header>
+
+<nav class="tabs">
+  <div class="tabs-in" role="tablist">
+    <button class="tab" role="tab" data-t="registro" aria-selected="true">Registro</button>
+    <button class="tab" role="tab" data-t="campograma" aria-selected="false">Campograma</button>
+    <button class="tab" role="tab" data-t="estatisticas" aria-selected="false">Estatísticas</button>
+    <button class="tab" role="tab" data-t="relatorio" aria-selected="false">Relatório</button>
+    <button class="tab" role="tab" data-t="comparacao" aria-selected="false">Comparação</button>
+    <button class="tab" role="tab" data-t="plantel" aria-selected="false">Plantel</button>
+    <button class="tab" role="tab" data-t="dados" aria-selected="false">Dados</button>
+  </div>
+</nav>
+
+<div class="wrap">
+
+  <!-- ============ REGISTRO ============ -->
+  <section id="registro">
+    <div class="roster" id="roster"></div>
+    <div class="grid" id="actGrid"></div>
+
+    <h2 class="sec">Equipe</h2>
+    <div class="grid" id="teamGrid"></div>
+
+    <div class="bar">
+      <button class="btn" id="undoBtn">↩ Desfazer último</button>
+      <span class="hint" id="lastInfo">Nenhum registro ainda.</span>
+    </div>
+
+    <h2 class="sec">Últimos registros</h2>
+    <div class="log" id="logBox"></div>
+  </section>
+
+  <!-- ============ CAMPOGRAMA ============ -->
+  <section id="campograma" hidden>
+    <p class="hint" style="margin:16px 0 0">Escolha o tipo de finalização e toque na quadra onde ela aconteceu. O registro entra na conta do jogador selecionado no Registro.</p>
+    <div class="modes" id="shotModes"></div>
+    <div class="pitchwrap">
+      <svg class="pitch" id="pitch" viewBox="0 0 400 200" aria-label="Quadra de futsal"></svg>
+    </div>
+    <div class="bar">
+      <button class="btn" id="undoShot">↩ Desfazer finalização</button>
+      <button class="btn" id="clearShots">Limpar campograma</button>
+      <span class="hint" id="shotInfo"></span>
+    </div>
+  </section>
+
+  <!-- ============ ESTATÍSTICAS ============ -->
+  <section id="estatisticas" hidden>
+    <h2 class="sec">Jogadores de linha</h2>
+    <div class="tw"><table id="tblLine"></table></div>
+    <h2 class="sec">Goleiros</h2>
+    <div class="tw"><table id="tblGk"></table></div>
+    <h2 class="sec">Legenda</h2>
+    <div class="legend" id="legend"></div>
+  </section>
+
+  <!-- ============ RELATÓRIO ============ -->
+  <section id="relatorio" hidden>
+    <div class="printonly" id="printHead"></div>
+
+    <h2 class="sec">Relatório geral da partida</h2>
+    <div class="rep" id="repBox"></div>
+
+    <div class="bar">
+      <button class="btn primary" id="expRepCsv">⤓ Exportar tudo (CSV)</button>
+      <button class="btn" id="expRepTxt">⤓ Resumo em texto</button>
+      <button class="btn" id="copyRep">⧉ Copiar resumo</button>
+      <button class="btn" id="printRep">⎙ Imprimir / PDF</button>
+    </div>
+    <p class="hint" style="margin:-4px 0 0">
+      <b>Exportar tudo</b> gera uma planilha com o relatório, as estatísticas de cada jogador,
+      os botões livres e o campograma. <b>Resumo em texto</b> gera um arquivo pronto para colar
+      no WhatsApp. Tudo funciona sem internet.
+    </p>
+
+    <h2 class="sec">Botões livres</h2>
+    <div class="tw"><table id="tblFree"></table></div>
+  </section>
+
+  <!-- ============ COMPARAÇÃO ============ -->
+  <section id="comparacao" hidden>
+    <h2 class="sec">Comparativo entre 2 registros</h2>
+    <div class="selrow">
+      <select id="cmpA"></select><span class="hint">×</span><select id="cmpB"></select>
+    </div>
+    <div class="cmp" id="cmpBox"></div>
+  </section>
+
+  <!-- ============ PLANTEL ============ -->
+  <section id="plantel" hidden>
+    <h2 class="sec">Plantel</h2>
+    <div class="plist" id="plist"></div>
+    <div class="bar">
+      <button class="btn" id="addPlayer">+ Adicionar jogador</button>
+      <span class="hint">Marque <b>GOL</b> para usar o painel de goleiro.</span>
+    </div>
+    <h2 class="sec">Botões livres</h2>
+    <p class="hint" style="margin:0 0 10px">Cinco contadores extras para o que você quiser marcar (pivô costas, 2ª trave, pressão alta...).</p>
+    <div class="plist" id="freeList"></div>
+  </section>
+
+  <!-- ============ DADOS ============ -->
+  <section id="dados" hidden>
+    <h2 class="sec">Exportar</h2>
+    <div class="bar">
+      <button class="btn primary" id="expCsvSum">CSV — relatório + estatísticas</button>
+      <button class="btn" id="expCsvEv">CSV — eventos</button>
+      <button class="btn" id="expTxt2">TXT — resumo</button>
+      <button class="btn" id="expJson">Backup .json</button>
+    </div>
+    <p class="hint" style="margin:-4px 0 0">O mesmo <b>CSV — relatório</b> também está no fim da aba Relatório.</p>
+    <h2 class="sec">Importar</h2>
+    <div class="bar">
+      <label class="btn" for="impFile">Restaurar backup .json</label>
+      <input id="impFile" type="file" accept=".json,application/json" hidden>
+    </div>
+    <h2 class="sec">Partida</h2>
+    <div class="bar">
+      <button class="btn danger" id="resetMatch">Zerar registros da partida</button>
+      <span class="hint">Mantém plantel e nomes. Não dá para desfazer — exporte antes.</span>
+    </div>
+    <h2 class="sec">Usar offline</h2>
+    <div class="bar">
+      <button class="btn primary" id="dlApp">⤓ Baixar o app (.html) para usar offline</button>
+    </div>
+    <div class="legend">
+      <b>1.</b> Toque no botão acima: baixa um arquivo <b>scout-futsal.html</b> com o app inteiro dentro.
+      Ele não depende de internet, servidor nem instalação.<br>
+      <b>2.</b> Guarde esse arquivo no aparelho (no iPad: <b>Arquivos → No meu iPad</b>) e abra com dois
+      toques. No computador é só dar duplo clique — abre no navegador normalmente.<br>
+      <b>3.</b> Marque o jogo do mesmo jeito. Tudo que você registra é salvo sozinho no próprio aparelho
+      a cada toque; pode fechar e voltar depois que continua de onde parou.<br>
+      <b>4.</b> Ao terminar o jogo, use <b>Exportar tudo (CSV)</b> na aba Relatório e o
+      <b>Backup .json</b> aqui — o .json é o arquivo que reabre a partida inteira em outro aparelho
+      (<b>Restaurar backup .json</b> acima).<br><br>
+      No <b>iPad pelo Safari online</b> também dá: botão Compartilhar → <b>Adicionar à Tela de Início</b>.
+      Abre em tela cheia e funciona sem internet depois do primeiro carregamento — mas o arquivo baixado
+      é mais seguro, porque não depende de o navegador manter o cache.
+    </div>
+    <h2 class="sec">Aparência</h2>
+    <div class="bar"><button class="btn" id="themeBtn">Alternar claro / escuro</button></div>
+  </section>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+(function(){
+"use strict";
+
+/* viewport meta (o wrapper pode não trazer) */
+if(!document.querySelector('meta[name=viewport]')){
+  document.head.insertAdjacentHTML('beforeend',
+    '<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">');
+}
+
+/* ---------- dicionário de ações (fiel à planilha) ---------- */
+var LINE=[
+  {c:'G',  d:'Gol',            k:'gol'},
+  {c:'A',  d:'Assistência',    k:'pos'},
+  {c:'PC', d:'Passe certo',    k:'pos'},
+  {c:'PE', d:'Passe errado',   k:'neg'},
+  {c:'CC', d:'Chute certo',    k:'pos'},
+  {c:'CE', d:'Chute errado',   k:'neg'},
+  {c:'DE', d:'Desarme',        k:'pos'},
+  {c:'DO', d:'Desarmado',      k:'neg'},
+  {c:'FS', d:'Falta sofrida',  k:'pos'},
+  {c:'FC', d:'Falta cometida', k:'neg'},
+  {c:'I',  d:'Impedimento',    k:'neg'},
+  {c:'CA', d:'Cartão amarelo', k:'ca'},
+  {c:'CV', d:'Cartão vermelho',k:'cv'}
+];
+var GK=[
+  {c:'GS', d:'Gol sofrido',       k:'gol'},
+  {c:'DD', d:'Defesa difícil',    k:'pos'},
+  {c:'D',  d:'Defesa simples',    k:'pos'},
+  {c:'F',  d:'Chute do adv. fora',k:'pos'},
+  {c:'PC', d:'Passe certo',       k:'pos'},
+  {c:'PE', d:'Passe errado',      k:'neg'},
+  {c:'RC', d:'Reposição certa',   k:'pos'},
+  {c:'RE', d:'Reposição errada',  k:'neg'},
+  {c:'FS', d:'Falta sofrida',     k:'pos'},
+  {c:'FC', d:'Falta cometida',    k:'neg'},
+  {c:'AI', d:'Ação individual',   k:'pos'},
+  {c:'CA', d:'Cartão amarelo',    k:'ca'},
+  {c:'CV', d:'Cartão vermelho',   k:'cv'}
+];
+var TEAM=[
+  {c:'EF', d:'Escanteio a favor',   k:'pos'},
+  {c:'EC', d:'Escanteio contra',    k:'neg'},
+  {c:'ACA',d:'Adv. cartão amarelo', k:'ca'},
+  {c:'ACV',d:'Adv. cartão vermelho',k:'cv'}
+];
+var FREE=['L1','L2','L3','L4','L5'];
+var DESC={};
+LINE.concat(GK,TEAM).forEach(function(a){DESC[a.c]=a.d;});
+
+var SHOTS=[
+  {m:'G', label:'Gol',       color:'var(--gol)'},
+  {m:'CC',label:'No gol',    color:'var(--accent)'},
+  {m:'CE',label:'Pra fora',  color:'var(--neg)'}
+];
+
+/* ---------- estado ---------- */
+var KEY='futsal-scouting-v1';
+var mem=null, canStore=true;
+function load(){
+  try{ var r=localStorage.getItem(KEY); return r?JSON.parse(r):null; }
+  catch(e){ canStore=false; return mem; }
+}
+function save(){
+  try{ localStorage.setItem(KEY,JSON.stringify(S)); }
+  catch(e){ canStore=false; mem=S; }
+}
+function blank(){
+  var ps=[],i;
+  for(i=1;i<=12;i++) ps.push({id:'p'+i,num:i,name:'Jogador '+i,gk:(i===1)});
+  return {
+    team:'Minha equipe', opp:'Adversário',
+    players:ps, events:[], shots:[],
+    freeLabels:['Livre 1','Livre 2','Livre 3','Livre 4','Livre 5'],
+    clock:{sec:0,running:false,started:0}, period:1,
+    sel:'p1', shotMode:'G', theme:null
+  };
+}
+var S=load()||blank();
+/* migração leve */
+if(!S.shots) S.shots=[];
+if(!S.freeLabels) S.freeLabels=['Livre 1','Livre 2','Livre 3','Livre 4','Livre 5'];
+if(!S.clock) S.clock={sec:0,running:false,started:0};
+if(!S.period) S.period=1;
+
+/* ---------- helpers ---------- */
+function $(s){return document.querySelector(s);}
+function el(t,c,x){var e=document.createElement(t);if(c)e.className=c;if(x!=null)e.textContent=x;return e;}
+function player(id){for(var i=0;i<S.players.length;i++) if(S.players[i].id===id) return S.players[i];return null;}
+function fmt(sec){var m=Math.floor(sec/60),s=Math.floor(sec%60);
+  return (m<10?'0':'')+m+':'+(s<10?'0':'')+s;}
+function now(){ var c=S.clock; return c.running ? c.sec+(Date.now()-c.started)/1000 : c.sec; }
+function toast(msg){var t=$('#toast');t.textContent=msg;t.classList.add('on');
+  clearTimeout(toast._i);toast._i=setTimeout(function(){t.classList.remove('on');},1600);}
+
+function count(pid,code){
+  var n=0,e;
+  for(var i=0;i<S.events.length;i++){e=S.events[i];if(e.p===pid&&e.c===code)n++;}
+  return n;
+}
+function teamCount(code){
+  var n=0;
+  for(var i=0;i<S.events.length;i++) if(S.events[i].p===null&&S.events[i].c===code) n++;
+  return n;
+}
+function sumAll(code,gk){
+  var n=0;
+  for(var i=0;i<S.players.length;i++){
+    var p=S.players[i];
+    if(gk!==undefined && !!p.gk!==gk) continue;
+    n+=count(p.id,code);
+  }
+  return n;
+}
+function pct(a,b){ return b>0 ? Math.round(a*1000/b)/10 : 0; }
+
+/* ---------- registrar / desfazer ---------- */
+function log(pid,code,extra){
+  var ev={p:pid,c:code,t:Math.round(now()),per:S.period,id:Date.now()+Math.random()};
+  if(extra){ev.x=extra.x;ev.y=extra.y;}
+  S.events.push(ev); save(); renderAll(); return ev;
+}
+function undoLast(){
+  if(!S.events.length){toast('Nada para desfazer');return;}
+  var e=S.events.pop();
+  for(var i=S.shots.length-1;i>=0;i--) if(S.shots[i].ev===e.id){S.shots.splice(i,1);break;}
+  save(); renderAll();
+  toast('Desfeito: '+e.c+(e.p?' · '+(player(e.p)||{name:'?'}).name:' · equipe'));
+}
+
+/* ---------- relógio ---------- */
+function tickClock(){ $('#clockT').textContent=fmt(now()); }
+setInterval(function(){ if(S.clock.running) tickClock(); },500);
+
+$('#clockBtn').addEventListener('click',function(){
+  var c=S.clock;
+  if(c.running){ c.sec=now(); c.running=false; }
+  else { c.started=Date.now(); c.running=true; }
+  this.textContent=c.running?'Pausar':'Iniciar';
+  this.classList.toggle('on',c.running);
+  save(); tickClock();
+});
+$('#periodBtn').addEventListener('click',function(){
+  S.period=S.period===1?2:1; this.textContent=S.period+'º T'; save();
+});
+
+/* ---------- placar / nomes ---------- */
+$('#teamName').addEventListener('input',function(){S.team=this.value;save();});
+$('#oppName').addEventListener('input',function(){S.opp=this.value;save();});
+
+function renderScore(){
+  $('#scoreUs').textContent=sumAll('G');
+  $('#scoreThem').textContent=sumAll('GS');
+}
+
+/* ---------- roster ---------- */
+function renderRoster(){
+  var box=$('#roster'); box.textContent='';
+  S.players.forEach(function(p){
+    var b=el('button','pchip'+(p.gk?' gk':''));
+    b.type='button'; b.setAttribute('aria-pressed',String(S.sel===p.id));
+    b.appendChild(el('span','n',String(p.num)));
+    b.appendChild(el('span','nm',p.name));
+    b.addEventListener('click',function(){S.sel=p.id;save();renderRoster();renderActions();renderPitch();});
+    box.appendChild(b);
+  });
+}
+
+/* ---------- grade de ações ---------- */
+function actButton(code,desc,kind,pid){
+  var b=el('button','act'); b.type='button';
+  b.setAttribute('data-kind',kind);
+  var n=pid===null?teamCount(code):count(pid,code);
+  b.setAttribute('data-has',n>0?'1':'0');
+  var c=el('span','cnt',String(n));
+  var box=el('div');
+  box.appendChild(el('span','code',code));
+  b.appendChild(c); b.appendChild(box); b.appendChild(el('span','desc',desc));
+  b.addEventListener('click',function(){
+    log(pid,code);
+    b.classList.remove('flash'); void b.offsetWidth; b.classList.add('flash');
+    if(navigator.vibrate) navigator.vibrate(8);
+  });
+  return b;
+}
+function renderActions(){
+  var g=$('#actGrid'); g.textContent='';
+  var p=player(S.sel);
+  if(!p){ g.appendChild(el('p','hint','Nenhum jogador selecionado.')); }
+  else{
+    var set=p.gk?GK:LINE;
+    set.forEach(function(a){ g.appendChild(actButton(a.c,a.d,a.k,p.id)); });
+    FREE.forEach(function(code,i){
+      g.appendChild(actButton(code,S.freeLabels[i]||('Livre '+(i+1)),'free',p.id));
+    });
+  }
+  var t=$('#teamGrid'); t.textContent='';
+  TEAM.forEach(function(a){ t.appendChild(actButton(a.c,a.d,a.k,null)); });
+}
+
+/* ---------- log ---------- */
+function renderLog(){
+  var box=$('#logBox'); box.textContent='';
+  var evs=S.events.slice(-40).reverse();
+  if(!evs.length){ box.appendChild(el('div','logrow','Sem registros.')); }
+  evs.forEach(function(e){
+    var r=el('div','logrow');
+    r.appendChild(el('span','tm',e.per+'T '+fmt(e.t)));
+    r.appendChild(el('span','cd',e.c));
+    var nm = e.p ? ((player(e.p)||{num:'?',name:'—'}).num+' · '+(player(e.p)||{name:'—'}).name) : 'Equipe';
+    r.appendChild(el('span','',nm));
+    r.appendChild(el('span','hint',DESC[e.c]||S.freeLabels[FREE.indexOf(e.c)]||''));
+    box.appendChild(r);
+  });
+  var last=S.events[S.events.length-1];
+  $('#lastInfo').textContent = last
+    ? 'Último: '+last.c+' — '+(last.p?(player(last.p)||{name:'—'}).name:'equipe')+' aos '+fmt(last.t)+' do '+last.per+'º tempo.'
+    : 'Nenhum registro ainda.';
+  $('#undoBtn').disabled=!S.events.length;
+}
+
+/* ---------- campograma ---------- */
+function renderShotModes(){
+  var box=$('#shotModes'); box.textContent='';
+  SHOTS.forEach(function(s){
+    var b=el('button','mode'); b.type='button';
+    b.setAttribute('aria-pressed',String(S.shotMode===s.m));
+    var d=el('span','dot'); d.style.background=s.color;
+    b.appendChild(d); b.appendChild(el('span','',s.label));
+    b.addEventListener('click',function(){S.shotMode=s.m;save();renderShotModes();});
+    box.appendChild(b);
+  });
+}
+var NS='http://www.w3.org/2000/svg';
+function sv(t,attrs){var e=document.createElementNS(NS,t);for(var k in attrs)e.setAttribute(k,attrs[k]);return e;}
+
+function renderPitch(){
+  // quadra 40 x 20 m -> viewBox 400 x 200 (10 px = 1 m)
+  var p=$('#pitch'); p.textContent='';
+  var line=getComputedStyle(document.documentElement).getPropertyValue('--line').trim();
+  var soft=getComputedStyle(document.documentElement).getPropertyValue('--surface-2').trim();
+  p.appendChild(sv('rect',{x:0,y:0,width:400,height:200,fill:soft,rx:6}));
+  var st={fill:'none',stroke:line,'stroke-width':1.6};
+  function add(t,a){var e=sv(t,a);for(var k in st) if(!(k in a)) e.setAttribute(k,st[k]);p.appendChild(e);return e;}
+  add('rect',{x:10,y:10,width:380,height:180});
+  add('line',{x1:200,y1:10,x2:200,y2:190});
+  add('circle',{cx:200,cy:100,r:30});
+  // áreas: quarto de círculo r=6m a partir de cada poste
+  add('path',{d:'M10,40 A60,60 0 0 1 70,100 L70,100 A60,60 0 0 1 10,160'});
+  add('path',{d:'M390,40 A60,60 0 0 0 330,100 L330,100 A60,60 0 0 0 390,160'});
+  // marcas de penalti (6m) e segundo penalti (10m)
+  [[70,100],[330,100],[110,100],[290,100]].forEach(function(c){
+    p.appendChild(sv('circle',{cx:c[0],cy:c[1],r:2,fill:line}));
+  });
+  // gols (3 m)
+  add('rect',{x:4,y:85,width:6,height:30});
+  add('rect',{x:390,y:85,width:6,height:30});
+
+  // marcadores
+  S.shots.forEach(function(s){
+    var col=(SHOTS.filter(function(x){return x.m===s.m;})[0]||SHOTS[1]).color;
+    var g=sv('g',{});
+    if(s.m==='G'){
+      g.appendChild(sv('circle',{cx:s.x,cy:s.y,r:6.5,fill:col,stroke:'#fff','stroke-width':1.6}));
+    }else if(s.m==='CC'){
+      g.appendChild(sv('circle',{cx:s.x,cy:s.y,r:5.5,fill:col,'fill-opacity':.85}));
+    }else{
+      g.appendChild(sv('circle',{cx:s.x,cy:s.y,r:5.5,fill:'none',stroke:col,'stroke-width':2}));
+    }
+    var t=sv('text',{x:s.x,y:s.y-9,'text-anchor':'middle','font-size':8,fill:'currentColor','font-family':'ui-monospace,monospace'});
+    t.textContent=s.num;
+    g.appendChild(t);
+    p.appendChild(g);
+  });
+
+  p.onclick=function(ev){
+    var pl=player(S.sel);
+    if(!pl){toast('Selecione um jogador na aba Registro');return;}
+    if(pl.gk){toast('Campograma é para finalizações de jogadores de linha');return;}
+    var r=p.getBoundingClientRect();
+    var x=(ev.clientX-r.left)/r.width*400, y=(ev.clientY-r.top)/r.height*200;
+    var e=log(pl.id,S.shotMode,{x:x,y:y});
+    S.shots.push({x:x,y:y,m:S.shotMode,num:pl.num,ev:e.id});
+    save(); renderPitch(); renderShotInfo();
+  };
+}
+function renderShotInfo(){
+  var g=S.shots.filter(function(s){return s.m==='G';}).length;
+  var cc=S.shots.filter(function(s){return s.m==='CC';}).length;
+  var ce=S.shots.filter(function(s){return s.m==='CE';}).length;
+  $('#shotInfo').textContent=S.shots.length
+    ? (S.shots.length+(S.shots.length===1?' finalização':' finalizações')+' · '+g+' gol, '+cc+' no gol, '+ce+' fora')
+    : '';
+}
+$('#undoShot').addEventListener('click',function(){
+  if(!S.shots.length){toast('Campograma vazio');return;}
+  var s=S.shots.pop();
+  for(var i=S.events.length-1;i>=0;i--) if(S.events[i].id===s.ev){S.events.splice(i,1);break;}
+  save(); renderAll();
+});
+$('#clearShots').addEventListener('click',function(){
+  if(!S.shots.length) return;
+  if(!confirm('Apagar todas as finalizações do campograma? Os contadores de chute também voltam.')) return;
+  var ids={}; S.shots.forEach(function(s){ids[s.ev]=1;});
+  S.events=S.events.filter(function(e){return !ids[e.id];});
+  S.shots=[]; save(); renderAll(); toast('Campograma limpo');
+});
+
+/* ---------- estatísticas ---------- */
+var COLS_LINE=['G','A','PC','PE','T','%','CC','CE','T','%','DE','DO','FS','FC','I','CA','CV'];
+var COLS_GK  =['GS','DD','PC','PE','T','%','RC','RE','T','%','D','F','FS','FC','AI','CA','CV'];
+
+/* T e % de chute incluem o gol: gol é finalização no alvo.
+   Assim o scout toca só "G" quando sai gol, sem precisar tocar CC junto. */
+function vals(c,gk){
+  if(gk){
+    var tp=c('PC')+c('PE'), tr=c('RC')+c('RE');
+    return [c('GS'),c('DD'),c('PC'),c('PE'),tp,pct(c('PC'),tp),c('RC'),c('RE'),tr,pct(c('RC'),tr),
+            c('D'),c('F'),c('FS'),c('FC'),c('AI'),c('CA'),c('CV')];
+  }
+  var tp2=c('PC')+c('PE'), tc=c('G')+c('CC')+c('CE');
+  return [c('G'),c('A'),c('PC'),c('PE'),tp2,pct(c('PC'),tp2),c('CC'),c('CE'),tc,pct(c('G')+c('CC'),tc),
+          c('DE'),c('DO'),c('FS'),c('FC'),c('I'),c('CA'),c('CV')];
+}
+function rowVals(p){ return vals(function(x){return count(p.id,x);}, p.gk); }
+function groupVals(players){
+  return vals(function(x){
+    var n=0; players.forEach(function(p){n+=count(p.id,x);}); return n;
+  }, players.length? !!players[0].gk : false);
+}
+function buildTable(tbl,cols,players){
+  tbl.textContent='';
+  var thead=el('thead'),tr=el('tr');
+  tr.appendChild(el('th','l','#'));
+  tr.appendChild(el('th','l','Jogador'));
+  cols.forEach(function(c){tr.appendChild(el('th','num',c));});
+  thead.appendChild(tr); tbl.appendChild(thead);
+  var tb=el('tbody');
+  players.forEach(function(p){
+    var r=el('tr'), v=rowVals(p);
+    r.appendChild(el('td','l num',String(p.num)));
+    r.appendChild(el('td','l',p.name));
+    v.forEach(function(x,i){
+      var isPct=cols[i]==='%';
+      r.appendChild(el('td','num'+(x?'':' z'), isPct? (x?x.toFixed(1)+'%':'—') : String(x)));
+    });
+    tb.appendChild(r);
+  });
+  var tr2=el('tr','tot'), tv=groupVals(players);
+  tr2.appendChild(el('td','l',''));
+  tr2.appendChild(el('td','l','Total'));
+  tv.forEach(function(x,i){
+    var isPct=cols[i]==='%';
+    tr2.appendChild(el('td','num', isPct? (x?x.toFixed(1)+'%':'—') : String(x)));
+  });
+  tb.appendChild(tr2);
+  tbl.appendChild(tb);
+}
+function renderStats(){
+  var line=S.players.filter(function(p){return !p.gk;});
+  var gks =S.players.filter(function(p){return  p.gk;});
+  buildTable($('#tblLine'),COLS_LINE,line);
+  buildTable($('#tblGk'),COLS_GK,gks);
+}
+
+/* ---------- relatório ---------- */
+function repRow(a,k,b,head){
+  var r=el('div','row'+(head?' head':''));
+  var ea=el('div','a'); ea.appendChild(el('span',head?'v':'v',a));
+  var ek=el('div','k',k);
+  var eb=el('div','b'); eb.appendChild(el('span','v',b));
+  r.appendChild(ea);r.appendChild(ek);r.appendChild(eb);
+  return r;
+}
+/* Linhas do relatório em forma de dados — a tela, o CSV e o TXT usam esta mesma fonte,
+   então nunca saem diferentes um do outro. */
+function reportRows(){
+  var usG=sumAll('G'), thG=sumAll('GS');
+  var usOn=usG+sumAll('CC'), usTot=usOn+sumAll('CE');
+  // chutes do adversário: gols sofridos + defesas do goleiro + chutes pra fora
+  var thOn=sumAll('DD',true)+sumAll('D',true)+thG, thTot=thOn+sumAll('F',true);
+  var pe=sumAll('PE'), pc=sumAll('PC');
+
+  var r=[
+    ['Placar',          String(usG),   String(thG)],
+    ['Total de chutes', String(usTot), String(thTot)],
+    ['Chutes a gol',    String(usOn),  String(thOn)],
+    ['Precisão', pct(usOn,usTot).toFixed(1)+'%', pct(thOn,thTot).toFixed(1)+'%'],
+    ['Passes errados',  String(pe),    '—']
+  ];
+  /* passe certo só aparece se o scout tiver marcado PC — se vocês não contabilizam,
+     o relatório não fica poluído com zeros */
+  if(pc>0){
+    r.push(['Passes certos', String(pc), '—']);
+    r.push(['Precisão de passe', pct(pc,pc+pe).toFixed(1)+'%', '—']);
+  }
+  r.push(['Escanteios',      String(teamCount('EF')), String(teamCount('EC'))]);
+  r.push(['Faltas sofridas', String(sumAll('FS')),    String(sumAll('FC'))]);
+  r.push(['Cartão amarelo',  String(sumAll('CA')),    String(teamCount('ACA'))]);
+  r.push(['Cartão vermelho', String(sumAll('CV')),    String(teamCount('ACV'))]);
+  return r;
+}
+function renderReport(){
+  var box=$('#repBox'); box.textContent='';
+  var head=el('div','row head');
+  var ha=el('div','a'); ha.appendChild(el('span','v',S.team||'Nós'));
+  head.appendChild(ha); head.appendChild(el('div','k','×'));
+  var hb=el('div','b'); hb.appendChild(el('span','v',S.opp||'Adversário'));
+  head.appendChild(hb); box.appendChild(head);
+
+  reportRows().forEach(function(r){ box.appendChild(repRow(r[1],r[0],r[2])); });
+
+  /* cabeçalho que só sai na impressão / PDF */
+  var ph=$('#printHead'); ph.textContent='';
+  var h1=el('h1',null,(S.team||'Nós')+'  '+sumAll('G')+' × '+sumAll('GS')+'  '+(S.opp||'Adversário'));
+  ph.appendChild(h1);
+  ph.appendChild(el('div','sub','Relatório da partida · '+dateBR()+' · '+S.events.length+' registros'));
+
+  var t=$('#tblFree'); t.textContent='';
+  var thead=el('thead'),tr=el('tr');
+  tr.appendChild(el('th','l','#')); tr.appendChild(el('th','l','Jogador'));
+  S.freeLabels.forEach(function(l){tr.appendChild(el('th','num',l));});
+  thead.appendChild(tr); t.appendChild(thead);
+  var tb=el('tbody');
+  S.players.forEach(function(p){
+    var r=el('tr');
+    r.appendChild(el('td','l num',String(p.num)));
+    r.appendChild(el('td','l',p.name));
+    FREE.forEach(function(c){var n=count(p.id,c);r.appendChild(el('td','num'+(n?'':' z'),String(n)));});
+    tb.appendChild(r);
+  });
+  t.appendChild(tb);
+}
+
+/* ---------- comparação ---------- */
+function fillSel(sel,val){
+  sel.textContent='';
+  S.players.forEach(function(p){
+    var o=el('option',null,p.num+' · '+p.name); o.value=p.id; sel.appendChild(o);
+  });
+  if(val) sel.value=val;
+}
+function renderCompare(){
+  var a=$('#cmpA'), b=$('#cmpB');
+  var va=a.value||S.players[0]&&S.players[0].id, vb=b.value||(S.players[1]||S.players[0]||{}).id;
+  fillSel(a,va); fillSel(b,vb);
+  var pa=player(a.value), pb=player(b.value);
+  var box=$('#cmpBox'); box.textContent='';
+  if(!pa||!pb) return;
+  var cols = (pa.gk&&pb.gk)?COLS_GK:COLS_LINE;
+  var va2=rowVals(pa), vb2=rowVals(pb);
+  cols.forEach(function(c,i){
+    var x=va2[i], y=vb2[i], max=Math.max(x,y,1);
+    var r=el('div','cmprow');
+    r.appendChild(el('span','v a', c==='%'?x.toFixed(1):String(x)));
+    var ta=el('div','track a'); var ia=el('i'); ia.style.width=(x/max*100)+'%'; ta.appendChild(ia);
+    r.appendChild(ta);
+    r.appendChild(el('span','k',c));
+    var tb2=el('div','track b'); var ib=el('i'); ib.style.width=(y/max*100)+'%'; tb2.appendChild(ib);
+    r.appendChild(tb2);
+    r.appendChild(el('span','v b', c==='%'?y.toFixed(1):String(y)));
+    box.appendChild(r);
+  });
+}
+$('#cmpA').addEventListener('change',renderCompare);
+$('#cmpB').addEventListener('change',renderCompare);
+
+/* ---------- plantel ---------- */
+function renderPlantel(){
+  var box=$('#plist'); box.textContent='';
+  S.players.forEach(function(p,idx){
+    var r=el('div','prow');
+    var n=el('input'); n.type='number'; n.value=p.num; n.min=0; n.max=99;
+    n.addEventListener('input',function(){p.num=parseInt(this.value||'0',10);save();renderRoster();renderStats();renderReport();renderCompare();});
+    var nm=el('input'); nm.type='text'; nm.value=p.name;
+    nm.addEventListener('input',function(){p.name=this.value;save();renderRoster();renderStats();renderReport();renderCompare();});
+    var gk=el('button','gkt',p.gk?'GOL':'LINHA'); gk.type='button';
+    gk.setAttribute('aria-pressed',String(!!p.gk));
+    gk.addEventListener('click',function(){p.gk=!p.gk;save();renderAll();});
+    var d=el('button','del','×'); d.type='button'; d.title='Remover';
+    d.addEventListener('click',function(){
+      if(!confirm('Remover '+p.name+'? Os registros dele também saem.')) return;
+      S.events=S.events.filter(function(e){return e.p!==p.id;});
+      S.shots=S.shots.filter(function(s){return s.num!==p.num;});
+      S.players.splice(idx,1);
+      if(S.sel===p.id) S.sel=(S.players[0]||{}).id;
+      save(); renderAll();
+    });
+    r.appendChild(n);r.appendChild(nm);r.appendChild(gk);r.appendChild(d);
+    box.appendChild(r);
+  });
+  var fb=$('#freeList'); fb.textContent='';
+  S.freeLabels.forEach(function(l,i){
+    var r=el('div','prow'); r.style.gridTemplateColumns='64px 1fr';
+    var tag=el('div','gkt',FREE[i]); tag.style.textAlign='center';
+    var inp=el('input'); inp.type='text'; inp.value=l;
+    inp.addEventListener('input',function(){S.freeLabels[i]=this.value;save();renderActions();renderReport();});
+    r.appendChild(tag);r.appendChild(inp);
+    fb.appendChild(r);
+  });
+}
+$('#addPlayer').addEventListener('click',function(){
+  var mx=0; S.players.forEach(function(p){if(p.num>mx)mx=p.num;});
+  S.players.push({id:'p'+Date.now(),num:mx+1,name:'Jogador '+(S.players.length+1),gk:false});
+  save(); renderAll();
+});
+
+/* ---------- legenda ---------- */
+function renderLegend(){
+  var parts=[];
+  LINE.concat(GK).concat(TEAM).forEach(function(a){
+    if(parts.indexOf(a.c)<0) parts.push('<b>'+a.c+'</b> '+a.d);
+  });
+  parts.push('<b>T</b> Total · <b>%</b> Precisão');
+  S.freeLabels.forEach(function(l,i){parts.push('<b>'+FREE[i]+'</b> '+l);});
+  $('#legend').innerHTML=parts.join(' &nbsp;·&nbsp; ')+
+    '<br><br>Precisão de passe = PC ÷ (PC+PE). Precisão de chute = (G+CC) ÷ (G+CC+CE): o gol já conta como '+
+    'finalização no alvo, então em gol você toca só <b>G</b>. Na planilha antiga o gol ficava fora dessa conta.';
+}
+
+/* ---------- export / import ---------- */
+function dl(name,text,type){
+  var b=new Blob([text],{type:type||'text/csv;charset=utf-8'});
+  var u=URL.createObjectURL(b), a=document.createElement('a');
+  a.href=u; a.download=name; document.body.appendChild(a); a.click();
+  setTimeout(function(){URL.revokeObjectURL(u);a.remove();},500);
+}
+function csvEsc(v){ v=String(v==null?'':v); return /[";\n]/.test(v)?'"'+v.replace(/"/g,'""')+'"':v; }
+function csv(rows){ return rows.map(function(r){return r.map(csvEsc).join(';');}).join('\n'); }
+
+function pad2(n){ return (n<10?'0':'')+n; }
+function dateBR(){ var d=new Date(); return pad2(d.getDate())+'/'+pad2(d.getMonth()+1)+'/'+d.getFullYear(); }
+function dateISO(){ var d=new Date(); return d.getFullYear()+'-'+pad2(d.getMonth()+1)+'-'+pad2(d.getDate()); }
+function slug(s){
+  s=String(s||'').trim();
+  try{ s=s.normalize('NFD').replace(/[\u0300-\u036f]/g,''); }catch(e){}
+  s=s.replace(/[^A-Za-z0-9]+/g,'-').replace(/^-+|-+$/g,'');
+  return s||'equipe';
+}
+/* nome do arquivo: relatorio_Nossa-x-Adversario_2026-08-07.csv */
+function fileName(prefix,ext){
+  return prefix+'_'+slug(S.team)+'-x-'+slug(S.opp)+'_'+dateISO()+'.'+ext;
+}
+/* COLS_LINE/COLS_GK repetem "T" e "%"; na planilha isso confunde, então aqui vão nomes únicos */
+var HEAD_LINE=['G','A','PC','PE','Passes T','Passes %','CC','CE','Chutes T','Chutes %','DE','DO','FS','FC','I','CA','CV'];
+var HEAD_GK  =['GS','DD','PC','PE','Passes T','Passes %','RC','RE','Reposicoes T','Reposicoes %','D','F','FS','FC','AI','CA','CV'];
+
+function statBlock(out,title,players,cols,head){
+  out.push([title,'#','Jogador'].concat(head));
+  players.forEach(function(p){
+    out.push([''].concat([p.num,p.name],rowVals(p).map(function(x,i){
+      return cols[i]==='%' ? x.toFixed(1).replace('.',',') : x;
+    })));
+  });
+  if(players.length){
+    out.push(['','','TOTAL'].concat(groupVals(players).map(function(x,i){
+      return cols[i]==='%' ? x.toFixed(1).replace('.',',') : x;
+    })));
+  }
+}
+
+/* planilha completa do pós-jogo: relatório + estatísticas + livres + campograma */
+function buildFullCsv(){
+  var out=[];
+  out.push(['SCOUT FUTSAL — relatório da partida']);
+  out.push(['Data',dateBR()]);
+  out.push(['Nossa equipe',S.team]);
+  out.push(['Adversário',S.opp]);
+  out.push(['Tempo de jogo',fmt(now())+' ('+S.period+'º tempo)']);
+  out.push([]);
+
+  out.push(['RELATÓRIO',S.team||'Nós',S.opp||'Adversário']);
+  /* decimal com vírgula: é assim que o Excel/Planilhas em pt-BR lê */
+  reportRows().forEach(function(r){
+    out.push([r[0],r[1].replace('.',','),r[2].replace('.',',')]);
+  });
+  out.push([]);
+
+  statBlock(out,'JOGADORES DE LINHA',S.players.filter(function(p){return !p.gk;}),COLS_LINE,HEAD_LINE);
+  out.push([]);
+  statBlock(out,'GOLEIROS',S.players.filter(function(p){return p.gk;}),COLS_GK,HEAD_GK);
+  out.push([]);
+
+  out.push(['BOTÕES LIVRES','#','Jogador'].concat(S.freeLabels));
+  S.players.forEach(function(p){
+    out.push([''].concat([p.num,p.name],FREE.map(function(c){return count(p.id,c);})));
+  });
+  out.push([]);
+
+  out.push(['CAMPOGRAMA','tempo','minuto','#','Jogador','tipo','x_m','y_m']);
+  S.shots.forEach(function(s){
+    var e=null,i;
+    for(i=0;i<S.events.length;i++) if(S.events[i].id===s.ev){e=S.events[i];break;}
+    out.push(['',e?e.per:'',e?fmt(e.t):'',s.num,'',DESC[s.m]||s.m,
+      (s.x/10).toFixed(1).replace('.',','),(s.y/10).toFixed(1).replace('.',',')]);
+  });
+  return csv(out);
+}
+
+/* resumo curto, pronto para colar no grupo do time */
+function buildTxt(){
+  var L=[];
+  L.push((S.team||'Nós')+' '+sumAll('G')+' × '+sumAll('GS')+' '+(S.opp||'Adversário'));
+  L.push(dateBR()+' · tempo de jogo '+fmt(now()));
+  L.push('');
+  reportRows().forEach(function(r){
+    if(r[0]==='Placar') return;
+    L.push(r[0]+': '+r[1]+(r[2]==='—'?'':' × '+r[2]));
+  });
+
+  var abriu=false;
+  function listBy(code,titulo){
+    var arr=[];
+    S.players.forEach(function(p){ var n=count(p.id,code); if(n) arr.push({p:p,n:n}); });
+    if(!arr.length) return;
+    arr.sort(function(a,b){return b.n-a.n;});
+    if(!abriu){ L.push(''); L.push('POR JOGADOR'); abriu=true; }
+    L.push(titulo+': '+arr.map(function(o){
+      return o.p.num+' '+o.p.name+(o.n>1?' ('+o.n+')':'');
+    }).join(', '));
+  }
+  listBy('G','Gols');
+  listBy('A','Assistências');
+  listBy('PE','Passes errados');
+  listBy('CA','Cartões amarelos');
+  listBy('CV','Cartões vermelhos');
+  return L.join('\n')+'\n';
+}
+
+function exportFullCsv(){
+  /* BOM para o Excel abrir os acentos certos */
+  dl(fileName('relatorio','csv'),'﻿'+buildFullCsv());
+  toast('Relatório + estatísticas exportados');
+}
+function exportTxt(){
+  dl(fileName('resumo','txt'),buildTxt(),'text/plain;charset=utf-8');
+  toast('Resumo em texto gerado');
+}
+$('#expRepCsv').addEventListener('click',exportFullCsv);
+$('#expRepTxt').addEventListener('click',exportTxt);
+$('#expTxt2').addEventListener('click',exportTxt);
+$('#printRep').addEventListener('click',function(){ window.print(); });
+$('#copyRep').addEventListener('click',function(){
+  var txt=buildTxt();
+  function fallback(){
+    var ta=document.createElement('textarea');
+    ta.value=txt; ta.setAttribute('readonly','');
+    ta.style.position='fixed'; ta.style.opacity='0';
+    document.body.appendChild(ta); ta.select(); ta.setSelectionRange(0,txt.length);
+    var ok=false; try{ ok=document.execCommand('copy'); }catch(e){}
+    ta.remove();
+    toast(ok?'Resumo copiado':'Não deu para copiar — use o botão de texto');
+  }
+  if(navigator.clipboard&&navigator.clipboard.writeText){
+    navigator.clipboard.writeText(txt).then(function(){toast('Resumo copiado');},fallback);
+  }else fallback();
+});
+
+/* baixa o próprio app como arquivo único, para rodar sem internet */
+$('#dlApp').addEventListener('click',function(){
+  /* serializa com a aba Registro à mostra, senão a cópia abre na aba Dados */
+  var atual=document.querySelector('.tab[aria-selected="true"]');
+  document.querySelector('.tab[data-t="registro"]').click();
+  var html=document.documentElement.outerHTML
+    .replace(/<!-- frame-runtime -->[\s\S]*?<!-- \/frame-runtime -->/,'');
+  if(atual) atual.click();
+  dl('scout-futsal.html','<!doctype html>\n'+html,'text/html;charset=utf-8');
+  toast('App baixado — abra o arquivo direto do aparelho');
+});
+$('#expCsvEv').addEventListener('click',function(){
+  var rows=[['tempo','minuto','numero','jogador','codigo','descricao','x_m','y_m']];
+  S.events.forEach(function(e){
+    var p=e.p?player(e.p):null;
+    rows.push([e.per,fmt(e.t),p?p.num:'',p?p.name:'EQUIPE',e.c,
+      DESC[e.c]||S.freeLabels[FREE.indexOf(e.c)]||'',
+      e.x!=null?(e.x/10).toFixed(1):'', e.y!=null?(e.y/10).toFixed(1):'']);
+  });
+  dl(fileName('eventos','csv'),'﻿'+csv(rows));
+  toast('CSV de eventos gerado');
+});
+$('#expCsvSum').addEventListener('click',exportFullCsv);
+$('#expJson').addEventListener('click',function(){
+  dl(fileName('backup','json'),JSON.stringify(S,null,1),'application/json');
+  toast('Backup gerado');
+});
+$('#impFile').addEventListener('change',function(){
+  var f=this.files[0]; if(!f) return;
+  var r=new FileReader();
+  r.onload=function(){
+    try{
+      var d=JSON.parse(r.result);
+      if(!d.players||!d.events) throw new Error('formato');
+      S=d; if(!S.shots)S.shots=[]; if(!S.clock)S.clock={sec:0,running:false,started:0};
+      S.clock.running=false; save(); boot(); toast('Backup restaurado');
+    }catch(e){ alert('Arquivo inválido. Use um backup .json gerado por este app.'); }
+  };
+  r.readAsText(f); this.value='';
+});
+$('#resetMatch').addEventListener('click',function(){
+  if(!confirm('Zerar todos os registros e o campograma desta partida? O plantel é mantido.')) return;
+  S.events=[]; S.shots=[]; S.clock={sec:0,running:false,started:0}; S.period=1;
+  save(); boot(); toast('Partida zerada');
+});
+$('#undoBtn').addEventListener('click',undoLast);
+
+/* ---------- tema ---------- */
+$('#themeBtn').addEventListener('click',function(){
+  var cur=document.documentElement.getAttribute('data-theme');
+  var next = cur==='dark' ? 'light' : cur==='light' ? 'dark'
+    : (matchMedia('(prefers-color-scheme: dark)').matches?'light':'dark');
+  document.documentElement.setAttribute('data-theme',next);
+  S.theme=next; save(); renderPitch();
+});
+
+/* ---------- abas ---------- */
+var tabs=[].slice.call(document.querySelectorAll('.tab'));
+tabs.forEach(function(t){
+  t.addEventListener('click',function(){
+    tabs.forEach(function(o){o.setAttribute('aria-selected',String(o===t));});
+    ['registro','campograma','estatisticas','relatorio','comparacao','plantel','dados']
+      .forEach(function(id){ $('#'+id).hidden = (id!==t.dataset.t); });
+    window.scrollTo(0,0);
+    if(t.dataset.t==='campograma') renderPitch();
+  });
+});
+
+/* ---------- render ---------- */
+function renderAll(){
+  renderScore(); renderRoster(); renderActions(); renderLog();
+  renderStats(); renderReport(); renderCompare(); renderPlantel();
+  renderShotInfo(); renderLegend();
+  if(!$('#campograma').hidden) renderPitch();
+}
+function boot(){
+  if(S.theme) document.documentElement.setAttribute('data-theme',S.theme);
+  $('#teamName').value=S.team; $('#oppName').value=S.opp;
+  $('#periodBtn').textContent=S.period+'º T';
+  $('#clockBtn').textContent=S.clock.running?'Pausar':'Iniciar';
+  $('#clockBtn').classList.toggle('on',!!S.clock.running);
+  tickClock(); renderShotModes(); renderPitch(); renderAll();
+  var h=document.querySelector('header.board').offsetHeight;
+  document.documentElement.style.setProperty('--tabtop',h+'px');
+  if(!canStore) toast('Aviso: este navegador bloqueou o salvamento automático — exporte o backup ao terminar.');
+}
+window.addEventListener('resize',function(){
+  var h=document.querySelector('header.board').offsetHeight;
+  document.documentElement.style.setProperty('--tabtop',h+'px');
+});
+boot();
+})();
+</script>
+<script>
+if('serviceWorker' in navigator && window===top && location.protocol.indexOf('http')===0){
+  window.addEventListener('load',function(){
+    navigator.serviceWorker.register('./sw.js').catch(function(){});
+  });
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,16 @@
+# Vercel
+.vercel/
+
+# Claude Code (preferências locais da máquina)
+.claude/settings.local.json
+
+# Exportações geradas durante o uso
+relatorio_*.csv
+resumo_*.txt
+eventos_*.csv
+backup_*.json
+
+# Sistema
+.DS_Store
+Thumbs.db
+__pycache__/
