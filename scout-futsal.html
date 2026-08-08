@@ -1,4 +1,4 @@
-<title>Futsal Scouting</title>
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                <title>Futsal Scouting</title>
 <style>
   :root{
     --paper:#EDF0EE; --surface:#FFFFFF; --surface-2:#F5F7F5;
@@ -1531,9 +1531,9 @@ $('#dlApp').addEventListener('click',function(){
   var atual=document.querySelector('.tab[aria-selected="true"]');
   document.querySelector('.tab[data-t="registro"]').click();
   var html=document.documentElement.outerHTML
-    .replace(/<!-- frame-runtime -->[\s\S]*?<!-- \/frame-runtime -->/,'');
+    .replace(new RegExp('<'+'!-- frame-runtime -->[\\s\\S]*?<'+'!-- \\/frame-runtime -->'),'');
   if(atual) atual.click();
-  dl('scout-futsal.html','<!doctype html>\n'+html,'text/html;charset=utf-8');
+  dl('scout-futsal.html','<'+'!doctype html>\n'+html,'text/html;charset=utf-8');
   toast('App baixado — abra o arquivo direto do aparelho');
 });
 $('#expCsvEv').addEventListener('click',function(){
