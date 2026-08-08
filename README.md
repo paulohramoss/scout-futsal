@@ -73,6 +73,39 @@ Edite `scout-futsal.html`, rode o comando acima e faça o commit dos dois
 arquivos. `index.html` é gerado, mas **vai versionado** — é ele que o Vercel
 publica, e não existe passo de build no deploy.
 
+## Fluxo de trabalho
+
+Duas branches, dois endereços:
+
+| Branch | Endereço | Para quê |
+|---|---|---|
+| `staging` | `scout-futsal-git-staging-paulohramoss-projects.vercel.app` | Testar antes de soltar |
+| `main` | **scoutfutsal.vercel.app** | O link que o pessoal usa no jogo |
+
+Todo push gera deploy sozinho. Trabalhe sempre na `staging`:
+
+```bash
+git checkout staging
+# edita scout-futsal.html, roda python3 build.py
+git add -A && git commit -m "..."
+git push
+```
+
+Testou e aprovou, sobe para produção:
+
+```bash
+git checkout main && git merge staging && git push
+git checkout staging
+```
+
+### Atenção: os dois endereços têm bancos separados
+
+Staging e produção são domínios diferentes, e o IndexedDB é preso ao domínio.
+**O que você marcar testando na staging não existe em produção**, e o contrário
+também. Nunca marque um jogo de verdade no endereço de teste — não tem como
+trazer os dados de lá para cá, a não ser exportando o backup `.json` num e
+restaurando no outro.
+
 Depois de um deploy novo, o app abre a versão em cache e baixa a nova em segundo
 plano: ela entra no abrir seguinte. Fechar e abrir de novo resolve.
 
