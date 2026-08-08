@@ -9,6 +9,8 @@ no próprio aparelho.
 - **Registro** — um toque por ação, por jogador. Painel separado para goleiro
   (gol sofrido, defesa difícil, reposição). Cronômetro, placar, 1º/2º tempo e
   cinco botões livres que você renomeia para o que quiser marcar.
+- **Partidas** — vários scouts no mesmo aparelho, cada um com o próprio plantel
+  e o próprio histórico de jogos. Reabra qualquer partida anterior.
 - **Campograma** — toca na quadra onde saiu a finalização; entra na conta do
   jogador selecionado e vira coordenada em metros na exportação.
 - **Estatísticas** — tabela por jogador, com totais e precisão de passe e chute.
@@ -29,9 +31,26 @@ tela cheia e funciona sem sinal — um service worker guarda o app no aparelho.
 Sai um arquivo único com o app inteiro dentro; guarde no aparelho e abra com dois
 toques. É o mesmo que o `index.html` deste repositório.
 
-Em qualquer um dos dois, os registros são salvos sozinhos a cada toque
-(`localStorage`). Para levar de um aparelho para o outro, use **Backup .json** e
-**Restaurar backup .json**.
+## Onde ficam os dados
+
+Num banco dentro do próprio navegador — **IndexedDB**, com queda para
+`localStorage` e, no pior caso, memória, se o navegador bloquear (Safari em modo
+privado). Não existe servidor, conta nem sincronização: **nada sai do aparelho**,
+nem quando tem internet.
+
+Três coleções: `perfis` (o scout, seu plantel e seus botões livres), `partidas`
+(uma por jogo, ligada ao perfil) e `app` (qual perfil e qual partida estão
+abertos, e o tema). Grava sozinho a cada toque.
+
+Isso significa que **os dados não atravessam aparelhos.** Cada iPad tem o próprio
+banco. Para levar um scout inteiro de um aparelho para outro — perfil, plantel e
+todas as partidas — use **Backup .json** e **Restaurar backup .json** na aba
+Dados.
+
+Sobre a trava por PIN: ela evita abrir o perfil errado por engano. **Não é
+senha** — quem tem o aparelho na mão passa por ela pelo console do navegador.
+Senha que vale alguma coisa só existiria com servidor, que é justamente o que
+este projeto não tem.
 
 ## Arquivos
 

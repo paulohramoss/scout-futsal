@@ -1,0 +1,195 @@
+{
+ "versao": 2,
+ "gerado": 1786147142470,
+ "perfil": {
+  "id": "umsjlulk5v1dr4",
+  "nome": "Meu scout",
+  "pin": "1234",
+  "time": "Grêmio Futsal",
+  "plantel": [
+   {
+    "id": "p1",
+    "num": 1,
+    "name": "Léo GK",
+    "gk": true
+   },
+   {
+    "id": "p2",
+    "num": 7,
+    "name": "Ramos",
+    "gk": false
+   },
+   {
+    "id": "p3",
+    "num": 9,
+    "name": "Tiago",
+    "gk": false
+   }
+  ],
+  "freeLabels": [
+   "Pivô costas",
+   "2ª trave",
+   "Pressão",
+   "L4",
+   "L5"
+  ],
+  "criado": 1786147072421
+ },
+ "partidas": [
+  {
+   "id": "mmsjlv3jlw4ai6",
+   "perfil": "umsjlulk5v1dr4",
+   "criada": 1786147095729,
+   "atualizada": 1786147096146,
+   "team": "Grêmio Futsal",
+   "opp": "Adversário",
+   "players": [
+    {
+     "id": "p1",
+     "num": 1,
+     "name": "Léo GK",
+     "gk": true
+    },
+    {
+     "id": "p2",
+     "num": 7,
+     "name": "Ramos",
+     "gk": false
+    },
+    {
+     "id": "p3",
+     "num": 9,
+     "name": "Tiago",
+     "gk": false
+    }
+   ],
+   "events": [
+    {
+     "p": "p2",
+     "c": "G",
+     "t": 0,
+     "per": 1,
+     "id": 1786147096138.2908
+    },
+    {
+     "p": "p2",
+     "c": "G",
+     "t": 0,
+     "per": 1,
+     "id": 1786147096141.8696
+    },
+    {
+     "p": "p2",
+     "c": "G",
+     "t": 0,
+     "per": 1,
+     "id": 1786147096143.4263
+    },
+    {
+     "p": "p2",
+     "c": "PE",
+     "t": 0,
+     "per": 1,
+     "id": 1786147096144.683
+    },
+    {
+     "p": "p2",
+     "c": "PE",
+     "t": 0,
+     "per": 1,
+     "id": 1786147096146.4324
+    }
+   ],
+   "shots": [],
+   "freeLabels": [
+    "Pivô costas",
+    "2ª trave",
+    "Pressão",
+    "L4",
+    "L5"
+   ],
+   "clock": {
+    "sec": 0,
+    "running": false,
+    "started": 0
+   },
+   "period": 1,
+   "sel": "p2",
+   "shotMode": "G"
+  },
+  {
+   "id": "mmsjlulk5ppvd6",
+   "perfil": "umsjlulk5v1dr4",
+   "criada": 1786147072421,
+   "atualizada": 1786147072421,
+   "team": "Grêmio Futsal",
+   "opp": "Inter",
+   "players": [
+    {
+     "id": "p1",
+     "num": 1,
+     "name": "Léo GK",
+     "gk": true
+    },
+    {
+     "id": "p2",
+     "num": 7,
+     "name": "Ramos",
+     "gk": false
+    },
+    {
+     "id": "p3",
+     "num": 9,
+     "name": "Tiago",
+     "gk": false
+    }
+   ],
+   "events": [
+    {
+     "p": "p2",
+     "c": "G",
+     "t": 65,
+     "per": 1,
+     "id": 1
+    },
+    {
+     "p": "p2",
+     "c": "PE",
+     "t": 80,
+     "per": 1,
+     "id": 2
+    },
+    {
+     "p": "p3",
+     "c": "CE",
+     "t": 120,
+     "per": 1,
+     "id": 3
+    },
+    {
+     "p": "p1",
+     "c": "GS",
+     "t": 200,
+     "per": 2,
+     "id": 4
+    }
+   ],
+   "shots": [],
+   "freeLabels": [
+    "Pivô costas",
+    "2ª trave",
+    "Pressão",
+    "L4",
+    "L5"
+   ],
+   "clock": {
+    "sec": 640,
+    "running": false,
+    "started": 0
+   },
+   "period": 2,
+   "sel": "p2",
+   "shotMode": "G"
+  }
+ ]
+}

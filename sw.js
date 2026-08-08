@@ -3,7 +3,7 @@
    Serve o app a partir do cache: depois da primeira visita o link abre sem
    internet, inclusive na quadra sem sinal. Quando ha rede, busca a versao nova
    em segundo plano — ela entra no proximo abrir. */
-var CACHE = 'scout-futsal-v1';
+var CACHE = 'scout-futsal-v2';
 var ASSETS = [
   './',
   './index.html',

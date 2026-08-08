@@ -220,6 +220,35 @@
 
   :focus-visible{outline:2.5px solid var(--accent);outline-offset:2px}
 
+  /* ---------- perfis e histórico ---------- */
+  .clock{flex-wrap:wrap}
+  #perfilBtn{display:flex;align-items:center;gap:6px;max-width:150px}
+  #perfilBtn .quem{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+
+  .chips{display:flex;gap:8px;overflow-x:auto;padding:2px 2px 12px;scrollbar-width:none}
+  .chips::-webkit-scrollbar{display:none}
+  .pchip .lock{font-size:12px;opacity:.75}
+
+  .atual{background:var(--surface);border:1px solid var(--line-soft);border-radius:var(--r);
+    box-shadow:var(--shadow);padding:14px 16px}
+  .atual .top{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
+  .atual .pl{font-family:var(--num);font-size:26px;font-weight:700;letter-spacing:-.02em}
+  .atual .quem{font-weight:650}
+  .atual .meta{font-size:12.5px;color:var(--muted);margin-top:4px}
+
+  .hrow{display:grid;grid-template-columns:76px 1fr auto auto auto;gap:10px;align-items:center;
+    padding:9px 12px;border-bottom:1px solid var(--line-soft);font-size:13.5px}
+  .hrow:last-child{border-bottom:0}
+  .hrow .d{font-family:var(--num);color:var(--muted);font-size:12.5px}
+  .hrow .vs{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:13.5px;font-weight:500}
+  .hrow .pl{font-family:var(--num);font-weight:700;font-size:15px}
+  .hrow.on{background:var(--accent-soft)}
+  .hrow .tag{font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--accent);
+    font-weight:700}
+  .mini{border:1px solid var(--line);background:var(--surface-2);border-radius:8px;
+    padding:6px 11px;font-size:12.5px;font-weight:600;cursor:pointer}
+  .mini:active{transform:scale(.96)}
+
   /* ---------- cabeçalho de impressão ---------- */
   .printonly{display:none}
   #printHead h1{font-size:20px;margin:0 0 2px;font-weight:700}
@@ -255,6 +284,7 @@
       </div>
     </div>
     <div class="clock">
+      <button class="chipbtn" id="perfilBtn" title="Trocar de scout"><span>👤</span><span class="quem">—</span></button>
       <button class="chipbtn" id="periodBtn" title="Alternar tempo">1º T</button>
       <span class="t num" id="clockT">00:00</span>
       <button class="chipbtn" id="clockBtn">Iniciar</button>
@@ -269,6 +299,7 @@
     <button class="tab" role="tab" data-t="estatisticas" aria-selected="false">Estatísticas</button>
     <button class="tab" role="tab" data-t="relatorio" aria-selected="false">Relatório</button>
     <button class="tab" role="tab" data-t="comparacao" aria-selected="false">Comparação</button>
+    <button class="tab" role="tab" data-t="partidas" aria-selected="false">Partidas</button>
     <button class="tab" role="tab" data-t="plantel" aria-selected="false">Plantel</button>
     <button class="tab" role="tab" data-t="dados" aria-selected="false">Dados</button>
   </div>
@@ -349,6 +380,34 @@
     <div class="cmp" id="cmpBox"></div>
   </section>
 
+  <!-- ============ PARTIDAS ============ -->
+  <section id="partidas" hidden>
+    <h2 class="sec">Quem está marcando</h2>
+    <div class="chips" id="perfisBox"></div>
+    <div class="bar">
+      <button class="btn" id="addPerfil">+ Novo scout</button>
+      <button class="btn" id="renPerfil">Renomear</button>
+      <button class="btn" id="pinPerfil">Trava</button>
+      <button class="btn danger" id="delPerfil">Remover scout</button>
+    </div>
+    <p class="hint" style="margin:-4px 0 0">
+      Cada scout tem o próprio plantel e o próprio histórico — um não enxerga a partida do outro.
+      A <b>trava</b> é um PIN de quatro dígitos que evita abrir o perfil errado por engano;
+      não é senha: quem tem o aparelho na mão consegue passar por ela.
+    </p>
+
+    <h2 class="sec">Partida atual</h2>
+    <div class="atual" id="atualBox"></div>
+    <div class="bar">
+      <button class="btn primary" id="novaPartida">+ Começar outra partida</button>
+      <span class="hint">A de agora fica guardada no histórico.</span>
+    </div>
+
+    <h2 class="sec">Histórico deste scout</h2>
+    <div class="log" id="histBox"></div>
+    <p class="hint" id="histInfo" style="margin:10px 0 0"></p>
+  </section>
+
   <!-- ============ PLANTEL ============ -->
   <section id="plantel" hidden>
     <h2 class="sec">Plantel</h2>
@@ -372,6 +431,10 @@
       <button class="btn" id="expJson">Backup .json</button>
     </div>
     <p class="hint" style="margin:-4px 0 0">O mesmo <b>CSV — relatório</b> também está no fim da aba Relatório.</p>
+    <p class="hint" style="margin:-4px 0 0">
+      Os CSVs e o texto são da <b>partida aberta agora</b>. O <b>Backup .json</b> leva o scout
+      inteiro: perfil, plantel e todas as partidas dele.
+    </p>
     <h2 class="sec">Importar</h2>
     <div class="bar">
       <label class="btn" for="impFile">Restaurar backup .json</label>
@@ -380,7 +443,8 @@
     <h2 class="sec">Partida</h2>
     <div class="bar">
       <button class="btn danger" id="resetMatch">Zerar registros da partida</button>
-      <span class="hint">Mantém plantel e nomes. Não dá para desfazer — exporte antes.</span>
+      <span class="hint">Apaga os registros <b>desta</b> partida e mantém o plantel. Para guardar
+      esta e começar do zero, use <b>Começar outra partida</b> na aba Partidas.</span>
     </div>
     <h2 class="sec">Usar offline</h2>
     <div class="bar">
@@ -391,11 +455,12 @@
       Ele não depende de internet, servidor nem instalação.<br>
       <b>2.</b> Guarde esse arquivo no aparelho (no iPad: <b>Arquivos → No meu iPad</b>) e abra com dois
       toques. No computador é só dar duplo clique — abre no navegador normalmente.<br>
-      <b>3.</b> Marque o jogo do mesmo jeito. Tudo que você registra é salvo sozinho no próprio aparelho
-      a cada toque; pode fechar e voltar depois que continua de onde parou.<br>
+      <b>3.</b> Marque o jogo do mesmo jeito. Tudo é salvo sozinho a cada toque, num banco dentro do
+      próprio navegador — nada sai do aparelho, nem quando tem internet. Pode fechar e voltar que
+      continua de onde parou.<br>
       <b>4.</b> Ao terminar o jogo, use <b>Exportar tudo (CSV)</b> na aba Relatório e o
-      <b>Backup .json</b> aqui — o .json é o arquivo que reabre a partida inteira em outro aparelho
-      (<b>Restaurar backup .json</b> acima).<br><br>
+      <b>Backup .json</b> aqui — o .json é o arquivo que leva o scout inteiro, com todas as
+      partidas, para outro aparelho (<b>Restaurar backup .json</b> acima).<br><br>
       No <b>iPad pelo Safari online</b> também dá: botão Compartilhar → <b>Adicionar à Tela de Início</b>.
       Abre em tela cheia e funciona sem internet depois do primeiro carregamento — mas o arquivo baixado
       é mais seguro, porque não depende de o navegador manter o cache.
@@ -464,34 +529,242 @@ var SHOTS=[
   {m:'CE',label:'Pra fora',  color:'var(--neg)'}
 ];
 
+/* ---------- banco local ---------- */
+/* Banco de verdade, dentro do navegador: IndexedDB. Nada sai do aparelho.
+   Quando o navegador não deixa (Safari em modo privado, por exemplo), cai para
+   localStorage e, no pior caso, para a memória — a API é a mesma nos três, sempre
+   por Promise, então o resto do app não precisa saber qual está valendo. */
+var banco=(function(){
+  var NOME='scout-futsal', VER=1;
+  var LOJAS={perfis:'id', partidas:'id', app:'k'};
+  var db=null, modo='memoria', mem={perfis:{},partidas:{},app:{}};
+
+  function semIDB(){
+    db=null;
+    try{ localStorage.setItem('sf:t','1'); localStorage.removeItem('sf:t'); modo='ls'; }
+    catch(e){ modo='memoria'; }
+  }
+  function abrir(){
+    return new Promise(function(pronto){
+      if(!window.indexedDB){ semIDB(); return pronto(modo); }
+      var req;
+      try{ req=indexedDB.open(NOME,VER); }
+      catch(e){ semIDB(); return pronto(modo); }
+      var respondeu=false;
+      function encerra(ok){ if(respondeu) return; respondeu=true; if(!ok) semIDB(); pronto(modo); }
+      req.onupgradeneeded=function(){
+        var d=req.result, k, st;
+        for(k in LOJAS) if(!d.objectStoreNames.contains(k)){
+          st=d.createObjectStore(k,{keyPath:LOJAS[k]});
+          if(k==='partidas') st.createIndex('perfil','perfil',{unique:false});
+        }
+      };
+      req.onsuccess=function(){ if(respondeu){ req.result.close(); return; }
+        db=req.result; modo='idb'; encerra(true); };
+      req.onerror  =function(){ encerra(false); };
+      req.onblocked=function(){ encerra(false); };
+      /* já houve Safari que abriu o pedido e nunca respondeu nada */
+      setTimeout(function(){ encerra(false); },3000);
+    });
+  }
+  function loja(nome,mod){
+    try{ return db.transaction(nome,mod).objectStore(nome); }catch(e){ return null; }
+  }
+  function prom(r){
+    if(!r) return Promise.reject(new Error('sem transação'));
+    return new Promise(function(ok,nao){
+      r.onsuccess=function(){ ok(r.result); };
+      r.onerror  =function(){ nao(r.error); };
+    });
+  }
+  function chaveLs(n,c){ return 'sf:'+n+':'+c; }
+
+  return {
+    abrir:abrir,
+    modo:function(){ return modo; },
+
+    grava:function(n,obj){
+      if(modo==='idb'){
+        var st=loja(n,'readwrite');
+        if(st) return prom(st.put(obj)).catch(function(){});
+      }
+      var c=obj[LOJAS[n]];
+      if(modo==='ls'){
+        try{ localStorage.setItem(chaveLs(n,c),JSON.stringify(obj)); }
+        catch(e){ modo='memoria'; mem[n][c]=obj; }
+      }else mem[n][c]=obj;
+      return Promise.resolve();
+    },
+
+    por:function(n,c){
+      if(c==null) return Promise.resolve(null);
+      if(modo==='idb'){
+        var st=loja(n,'readonly');
+        if(st) return prom(st.get(c)).then(function(r){ return r||null; },function(){ return null; });
+      }
+      if(modo==='ls'){
+        var r=null;
+        try{ r=localStorage.getItem(chaveLs(n,c)); }catch(e){}
+        try{ return Promise.resolve(r?JSON.parse(r):null); }catch(e){ return Promise.resolve(null); }
+      }
+      return Promise.resolve(mem[n][c]||null);
+    },
+
+    tudo:function(n){
+      if(modo==='idb'){
+        var st=loja(n,'readonly');
+        if(st&&st.getAll) return prom(st.getAll()).then(function(r){ return r||[]; },function(){ return []; });
+      }
+      if(modo==='ls'){
+        var out=[], pre='sf:'+n+':', i, k, v;
+        try{
+          for(i=0;i<localStorage.length;i++){
+            k=localStorage.key(i);
+            if(k&&k.indexOf(pre)===0){
+              try{ v=JSON.parse(localStorage.getItem(k)); if(v) out.push(v); }catch(e){}
+            }
+          }
+        }catch(e){}
+        return Promise.resolve(out);
+      }
+      var arr=[],x; for(x in mem[n]) arr.push(mem[n][x]);
+      return Promise.resolve(arr);
+    },
+
+    apaga:function(n,c){
+      if(modo==='idb'){
+        var st=loja(n,'readwrite');
+        if(st) return prom(st.delete(c)).catch(function(){});
+      }
+      if(modo==='ls'){ try{ localStorage.removeItem(chaveLs(n,c)); }catch(e){} }
+      else delete mem[n][c];
+      return Promise.resolve();
+    }
+  };
+})();
+
 /* ---------- estado ---------- */
-var KEY='futsal-scouting-v1';
-var mem=null, canStore=true;
-function load(){
-  try{ var r=localStorage.getItem(KEY); return r?JSON.parse(r):null; }
-  catch(e){ canStore=false; return mem; }
-}
-function save(){
-  try{ localStorage.setItem(KEY,JSON.stringify(S)); }
-  catch(e){ canStore=false; mem=S; }
-}
-function blank(){
+var VELHO='futsal-scouting-v1';   /* onde a versão anterior guardava tudo */
+var P=null;                        /* perfil atual: quem está marcando */
+var CFG={theme:null};
+var S=null;                        /* partida atual — mesmo formato de sempre */
+
+function uid(pre){ return (pre||'')+Date.now().toString(36)+Math.random().toString(36).slice(2,7); }
+function copia(x){ return JSON.parse(JSON.stringify(x)); }
+
+function plantelPadrao(){
   var ps=[],i;
   for(i=1;i<=12;i++) ps.push({id:'p'+i,num:i,name:'Jogador '+i,gk:(i===1)});
+  return ps;
+}
+function labelsPadrao(){ return ['Livre 1','Livre 2','Livre 3','Livre 4','Livre 5']; }
+
+function perfilNovo(nome){
+  return { id:uid('u'), nome:nome||'Meu scout', pin:'', time:'Minha equipe',
+           plantel:plantelPadrao(), freeLabels:labelsPadrao(), criado:Date.now() };
+}
+function partidaNova(perfil){
+  var ps = perfil ? copia(perfil.plantel) : plantelPadrao();
   return {
-    team:'Minha equipe', opp:'Adversário',
+    id:uid('m'), perfil:perfil?perfil.id:null,
+    criada:Date.now(), atualizada:Date.now(),
+    team:perfil?perfil.time:'Minha equipe', opp:'Adversário',
     players:ps, events:[], shots:[],
-    freeLabels:['Livre 1','Livre 2','Livre 3','Livre 4','Livre 5'],
+    freeLabels:perfil?copia(perfil.freeLabels):labelsPadrao(),
     clock:{sec:0,running:false,started:0}, period:1,
-    sel:'p1', shotMode:'G', theme:null
+    sel:(ps[0]||{}).id, shotMode:'G'
   };
 }
-var S=load()||blank();
-/* migração leve */
-if(!S.shots) S.shots=[];
-if(!S.freeLabels) S.freeLabels=['Livre 1','Livre 2','Livre 3','Livre 4','Livre 5'];
-if(!S.clock) S.clock={sec:0,running:false,started:0};
-if(!S.period) S.period=1;
+/* partida vinda do banco pode ser antiga; completa o que falta */
+function normaliza(m){
+  if(!m.players) m.players=plantelPadrao();
+  if(!m.events) m.events=[];
+  if(!m.shots) m.shots=[];
+  if(!m.freeLabels) m.freeLabels=labelsPadrao();
+  if(!m.period) m.period=1;
+  if(!m.criada) m.criada=Date.now();
+  if(!m.sel||!m.players.some(function(p){return p.id===m.sel;})) m.sel=(m.players[0]||{}).id;
+  if(!m.shotMode) m.shotMode='G';
+  /* cronômetro nunca volta correndo: senão o tempo que o app ficou fechado
+     entrava no jogo. Reabriu, o scout aperta Iniciar de novo. */
+  m.clock={sec:(m.clock&&m.clock.sec)||0, running:false, started:0};
+  return m;
+}
+
+var aguardaSave=0;
+function save(){
+  if(!S) return;
+  S.atualizada=Date.now();
+  /* o plantel e os botões livres da partida viram o padrão do perfil,
+     para a próxima partida já nascer com o time certo */
+  if(P){ P.plantel=copia(S.players); P.freeLabels=copia(S.freeLabels); P.time=S.team; }
+  clearTimeout(aguardaSave);
+  aguardaSave=setTimeout(gravaJa,300);
+}
+function gravaJa(){
+  clearTimeout(aguardaSave);
+  if(S) banco.grava('partidas',S);
+  if(P) banco.grava('perfis',P);
+  banco.grava('app',{k:'cfg', perfil:P?P.id:null, partida:S?S.id:null, theme:CFG.theme});
+}
+window.addEventListener('pagehide',gravaJa);
+document.addEventListener('visibilitychange',function(){ if(document.hidden) gravaJa(); });
+
+/* dados da versão anterior, que guardava uma partida só em localStorage */
+function leVelho(){
+  var raw=null;
+  try{ raw=localStorage.getItem(VELHO); }catch(e){ return null; }
+  if(!raw) return null;
+  try{ var d=JSON.parse(raw); return (d&&d.players&&d.players.length)?d:null; }
+  catch(e){ return null; }
+}
+
+function partidasDoPerfil(id){
+  return banco.tudo('partidas').then(function(ms){
+    return ms.filter(function(m){ return m.perfil===id; })
+             .sort(function(a,b){ return (b.atualizada||0)-(a.atualizada||0); });
+  });
+}
+
+function iniciar(){
+  return banco.abrir().then(function(){
+    return Promise.all([banco.por('app','cfg'), banco.tudo('perfis')]);
+  }).then(function(r){
+    var cfg=r[0]||{}, perfis=r[1]||[];
+    CFG.theme=cfg.theme||null;
+
+    if(!perfis.length){
+      var velho=leVelho();
+      P=perfilNovo('Meu scout');
+      if(velho){
+        P.plantel=velho.players;
+        P.freeLabels=velho.freeLabels||labelsPadrao();
+        P.time=velho.team||'Minha equipe';
+        CFG.theme=velho.theme||CFG.theme;
+      }
+      S=partidaNova(P);
+      if(velho){
+        S.team=velho.team||S.team; S.opp=velho.opp||S.opp;
+        S.players=velho.players; S.events=velho.events||[]; S.shots=velho.shots||[];
+        S.freeLabels=velho.freeLabels||S.freeLabels;
+        S.period=velho.period||1; S.sel=velho.sel; S.clock=velho.clock;
+        normaliza(S);
+      }
+      return;
+    }
+
+    P=null;
+    perfis.forEach(function(u){ if(u.id===cfg.perfil) P=u; });
+    if(!P) P=perfis[0];
+
+    return banco.por('partidas',cfg.partida).then(function(m){
+      if(m&&m.perfil===P.id){ S=normaliza(m); return; }
+      return partidasDoPerfil(P.id).then(function(ms){
+        S = ms.length ? normaliza(ms[0]) : partidaNova(P);
+      });
+    });
+  }).then(gravaJa);
+}
 
 /* ---------- helpers ---------- */
 function $(s){return document.querySelector(s);}
@@ -540,7 +813,14 @@ function undoLast(){
 
 /* ---------- relógio ---------- */
 function tickClock(){ $('#clockT').textContent=fmt(now()); }
-setInterval(function(){ if(S.clock.running) tickClock(); },500);
+/* com o relógio andando, grava o tempo a cada 5s: se o app fechar no meio do
+   jogo, volta no minuto certo em vez de voltar no último Pausar */
+var tiques=0;
+setInterval(function(){
+  if(!S||!S.clock.running) return;
+  tickClock();
+  if(++tiques>=10){ tiques=0; S.clock.sec=now(); S.clock.started=Date.now(); save(); }
+},500);
 
 $('#clockBtn').addEventListener('click',function(){
   var c=S.clock;
@@ -915,6 +1195,184 @@ $('#addPlayer').addEventListener('click',function(){
   save(); renderAll();
 });
 
+/* ---------- perfis e histórico ---------- */
+function dataCurta(ms){
+  var d=new Date(ms||Date.now());
+  return pad2(d.getDate())+'/'+pad2(d.getMonth()+1);
+}
+function dataHora(ms){
+  var d=new Date(ms||Date.now());
+  return pad2(d.getDate())+'/'+pad2(d.getMonth()+1)+'/'+d.getFullYear()+' às '+
+         pad2(d.getHours())+'h'+pad2(d.getMinutes());
+}
+function golsDe(m){
+  var us=0,th=0,i,e;
+  for(i=0;i<m.events.length;i++){ e=m.events[i]; if(e.c==='G')us++; else if(e.c==='GS')th++; }
+  return us+' × '+th;
+}
+/* pede o PIN; devolve true se pode entrar */
+function destrava(u){
+  if(!u.pin) return true;
+  var r;
+  try{ r=prompt('PIN de '+u.nome); }
+  catch(e){ toast('Este navegador bloqueou a trava — use o arquivo baixado'); return false; }
+  if(r===null) return false;
+  if(String(r).trim()===u.pin) return true;
+  toast('PIN errado');
+  return false;
+}
+
+function trocaPerfil(u){
+  if(u.id===P.id) return;
+  if(!destrava(u)) return;
+  gravaJa();
+  P=u;
+  return partidasDoPerfil(P.id).then(function(ms){
+    S = ms.length ? normaliza(ms[0]) : partidaNova(P);
+    gravaJa(); boot();
+    toast('Agora marcando como '+P.nome);
+  });
+}
+
+function renderPerfilChip(){
+  var q=$('#perfilBtn').querySelector('.quem');
+  if(q) q.textContent = P ? P.nome : '—';
+}
+function renderPerfis(){
+  var box=$('#perfisBox'); box.textContent='';
+  renderPerfilChip();
+  banco.tudo('perfis').then(function(us){
+    us.sort(function(a,b){ return (a.criado||0)-(b.criado||0); });
+    box.textContent='';
+    us.forEach(function(u){
+      var b=el('button','pchip'); b.type='button';
+      b.setAttribute('aria-pressed',String(P&&u.id===P.id));
+      b.appendChild(el('span','n',(u.nome||'?').trim().charAt(0).toUpperCase()||'?'));
+      b.appendChild(el('span','nm',u.nome));
+      if(u.pin) b.appendChild(el('span','lock','🔒'));
+      b.addEventListener('click',function(){ trocaPerfil(u); });
+      box.appendChild(b);
+    });
+  });
+}
+
+function renderAtual(){
+  var box=$('#atualBox'); box.textContent='';
+  if(!S) return;
+  var top=el('div','top');
+  top.appendChild(el('span','quem',S.team||'Nós'));
+  top.appendChild(el('span','pl',golsDe(S)));
+  top.appendChild(el('span','quem',S.opp||'Adversário'));
+  box.appendChild(top);
+  box.appendChild(el('div','meta',
+    'Começada em '+dataHora(S.criada)+' · '+S.events.length+' registros · '+
+    S.shots.length+' finalizações no campograma · '+S.period+'º tempo, '+fmt(now())));
+}
+
+function renderHistorico(){
+  var box=$('#histBox'); box.textContent='';
+  if(!P) return;
+  partidasDoPerfil(P.id).then(function(ms){
+    box.textContent='';
+    if(!ms.length){ box.appendChild(el('div','logrow','Nenhuma partida ainda.')); }
+    ms.forEach(function(m){
+      var r=el('div','hrow'+(m.id===S.id?' on':''));
+      r.appendChild(el('span','d',dataCurta(m.criada)));
+      r.appendChild(el('span','vs',(m.team||'Nós')+' × '+(m.opp||'Adversário')));
+      r.appendChild(el('span','pl',golsDe(m)));
+
+      if(m.id===S.id){
+        r.appendChild(el('span','tag','atual'));
+        r.appendChild(el('span','',''));
+      }else{
+        var ab=el('button','mini','Abrir'); ab.type='button';
+        ab.addEventListener('click',function(){
+          gravaJa(); S=normaliza(m); gravaJa(); boot();
+          toast('Abriu '+(m.team||'Nós')+' × '+(m.opp||'Adversário'));
+        });
+        r.appendChild(ab);
+        var dl2=el('button','del','×'); dl2.type='button'; dl2.title='Apagar partida';
+        dl2.addEventListener('click',function(){
+          if(!confirm('Apagar '+(m.team||'Nós')+' × '+(m.opp||'Adversário')+
+                      ' de '+dataCurta(m.criada)+'? Não dá para desfazer.')) return;
+          banco.apaga('partidas',m.id).then(function(){ renderHistorico(); toast('Partida apagada'); });
+        });
+        r.appendChild(dl2);
+      }
+      box.appendChild(r);
+    });
+    var ev=0; ms.forEach(function(m){ ev+=m.events.length; });
+    $('#histInfo').textContent = ms.length
+      ? ms.length+(ms.length===1?' partida guardada':' partidas guardadas')+' neste aparelho, '+
+        ev+' registros no total. Guardadas em '+
+        (banco.modo()==='idb'?'banco do navegador (IndexedDB)':
+         banco.modo()==='ls'?'armazenamento local do navegador':'memória — exporte antes de fechar!')+'.'
+      : '';
+  });
+}
+function renderPartidas(){ renderPerfis(); renderAtual(); renderHistorico(); }
+
+$('#perfilBtn').addEventListener('click',function(){
+  var t=document.querySelector('.tab[data-t="partidas"]');
+  if(t) t.click();
+});
+$('#novaPartida').addEventListener('click',function(){
+  gravaJa();
+  S=partidaNova(P);
+  gravaJa(); boot();
+  toast('Partida nova — a anterior está no histórico');
+});
+$('#addPerfil').addEventListener('click',function(){
+  var nome;
+  try{ nome=prompt('Nome do scout'); }catch(e){ nome=null; }
+  if(nome===null) return;
+  nome=String(nome).trim();
+  if(!nome){ toast('Precisa de um nome'); return; }
+  gravaJa();
+  P=perfilNovo(nome);
+  S=partidaNova(P);
+  gravaJa(); boot();
+  toast('Scout '+nome+' criado');
+});
+$('#renPerfil').addEventListener('click',function(){
+  var nome;
+  try{ nome=prompt('Novo nome do scout',P.nome); }catch(e){ nome=null; }
+  if(nome===null) return;
+  nome=String(nome).trim();
+  if(!nome){ toast('Precisa de um nome'); return; }
+  P.nome=nome; gravaJa(); renderPerfis(); toast('Renomeado');
+});
+$('#pinPerfil').addEventListener('click',function(){
+  var r;
+  try{ r=prompt('PIN de 4 dígitos para '+P.nome+'. Deixe vazio para tirar a trava.',P.pin||''); }
+  catch(e){ toast('Este navegador bloqueou a trava'); return; }
+  if(r===null) return;
+  r=String(r).trim();
+  if(r&&!/^\d{4}$/.test(r)){ toast('Use 4 dígitos'); return; }
+  P.pin=r; gravaJa(); renderPerfis();
+  toast(r?'Trava ligada':'Trava removida');
+});
+$('#delPerfil').addEventListener('click',function(){
+  banco.tudo('perfis').then(function(us){
+    if(us.length<2){ toast('É o único scout — não dá para remover'); return; }
+    if(!destrava(P)) return;
+    if(!confirm('Remover o scout '+P.nome+' e TODAS as partidas dele? Não dá para desfazer.')) return;
+    var fora=P.id;
+    partidasDoPerfil(fora).then(function(ms){
+      return Promise.all(ms.map(function(m){ return banco.apaga('partidas',m.id); }));
+    }).then(function(){
+      return banco.apaga('perfis',fora);
+    }).then(function(){
+      P=null;
+      us.forEach(function(u){ if(!P&&u.id!==fora) P=u; });
+      return partidasDoPerfil(P.id).then(function(ms){
+        S = ms.length ? normaliza(ms[0]) : partidaNova(P);
+        gravaJa(); boot(); toast('Scout removido');
+      });
+    });
+  });
+});
+
 /* ---------- legenda ---------- */
 function renderLegend(){
   var parts=[];
@@ -973,6 +1431,7 @@ function statBlock(out,title,players,cols,head){
 function buildFullCsv(){
   var out=[];
   out.push(['SCOUT FUTSAL — relatório da partida']);
+  out.push(['Scout',P?P.nome:'—']);
   out.push(['Data',dateBR()]);
   out.push(['Nossa equipe',S.team]);
   out.push(['Adversário',S.opp]);
@@ -1089,20 +1548,52 @@ $('#expCsvEv').addEventListener('click',function(){
   toast('CSV de eventos gerado');
 });
 $('#expCsvSum').addEventListener('click',exportFullCsv);
+
+/* backup leva o scout inteiro: perfil, plantel e todas as partidas dele */
 $('#expJson').addEventListener('click',function(){
-  dl(fileName('backup','json'),JSON.stringify(S,null,1),'application/json');
-  toast('Backup gerado');
+  gravaJa();
+  partidasDoPerfil(P.id).then(function(ms){
+    var pacote={ versao:2, gerado:Date.now(), perfil:P, partidas:ms };
+    dl('backup_'+slug(P.nome)+'_'+dateISO()+'.json',JSON.stringify(pacote,null,1),'application/json');
+    toast(ms.length+(ms.length===1?' partida no backup':' partidas no backup'));
+  });
 });
 $('#impFile').addEventListener('change',function(){
   var f=this.files[0]; if(!f) return;
   var r=new FileReader();
   r.onload=function(){
-    try{
-      var d=JSON.parse(r.result);
-      if(!d.players||!d.events) throw new Error('formato');
-      S=d; if(!S.shots)S.shots=[]; if(!S.clock)S.clock={sec:0,running:false,started:0};
-      S.clock.running=false; save(); boot(); toast('Backup restaurado');
-    }catch(e){ alert('Arquivo inválido. Use um backup .json gerado por este app.'); }
+    var d;
+    try{ d=JSON.parse(r.result); }
+    catch(e){ alert('Arquivo ilegível. Use um backup .json gerado por este app.'); return; }
+
+    if(d&&d.versao===2&&d.perfil&&d.partidas){
+      if(!confirm('Restaurar o scout "'+d.perfil.nome+'" com '+d.partidas.length+
+                  ' partida(s)? Se já existir um scout com esse mesmo backup, ele é substituído.')) return;
+      gravaJa();
+      P=d.perfil;
+      Promise.all(d.partidas.map(function(m){ m.perfil=P.id; return banco.grava('partidas',normaliza(m)); }))
+        .then(function(){ return banco.grava('perfis',P); })
+        .then(function(){ return partidasDoPerfil(P.id); })
+        .then(function(ms){
+          S = ms.length ? normaliza(ms[0]) : partidaNova(P);
+          gravaJa(); boot();
+          toast('Scout '+P.nome+' restaurado');
+        });
+      return;
+    }
+
+    /* backup da versão anterior: uma partida só, entra no scout atual */
+    if(d&&d.players&&d.events){
+      var m=partidaNova(P);
+      m.team=d.team||m.team; m.opp=d.opp||m.opp;
+      m.players=d.players; m.events=d.events; m.shots=d.shots||[];
+      m.freeLabels=d.freeLabels||m.freeLabels; m.period=d.period||1;
+      m.clock=d.clock||m.clock;
+      S=normaliza(m); gravaJa(); boot();
+      toast('Partida restaurada em '+P.nome);
+      return;
+    }
+    alert('Arquivo inválido. Use um backup .json gerado por este app.');
   };
   r.readAsText(f); this.value='';
 });
@@ -1119,7 +1610,7 @@ $('#themeBtn').addEventListener('click',function(){
   var next = cur==='dark' ? 'light' : cur==='light' ? 'dark'
     : (matchMedia('(prefers-color-scheme: dark)').matches?'light':'dark');
   document.documentElement.setAttribute('data-theme',next);
-  S.theme=next; save(); renderPitch();
+  CFG.theme=next; gravaJa(); renderPitch();
 });
 
 /* ---------- abas ---------- */
@@ -1127,10 +1618,11 @@ var tabs=[].slice.call(document.querySelectorAll('.tab'));
 tabs.forEach(function(t){
   t.addEventListener('click',function(){
     tabs.forEach(function(o){o.setAttribute('aria-selected',String(o===t));});
-    ['registro','campograma','estatisticas','relatorio','comparacao','plantel','dados']
+    ['registro','campograma','estatisticas','relatorio','comparacao','partidas','plantel','dados']
       .forEach(function(id){ $('#'+id).hidden = (id!==t.dataset.t); });
     window.scrollTo(0,0);
     if(t.dataset.t==='campograma') renderPitch();
+    if(t.dataset.t==='partidas') renderPartidas();
   });
 });
 
@@ -1138,11 +1630,13 @@ tabs.forEach(function(t){
 function renderAll(){
   renderScore(); renderRoster(); renderActions(); renderLog();
   renderStats(); renderReport(); renderCompare(); renderPlantel();
-  renderShotInfo(); renderLegend();
+  renderShotInfo(); renderLegend(); renderPerfilChip();
   if(!$('#campograma').hidden) renderPitch();
+  /* a aba Partidas lê o banco; só vale o custo quando ela está à vista */
+  if(!$('#partidas').hidden) renderPartidas();
 }
 function boot(){
-  if(S.theme) document.documentElement.setAttribute('data-theme',S.theme);
+  if(CFG.theme) document.documentElement.setAttribute('data-theme',CFG.theme);
   $('#teamName').value=S.team; $('#oppName').value=S.opp;
   $('#periodBtn').textContent=S.period+'º T';
   $('#clockBtn').textContent=S.clock.running?'Pausar':'Iniciar';
@@ -1150,12 +1644,20 @@ function boot(){
   tickClock(); renderShotModes(); renderPitch(); renderAll();
   var h=document.querySelector('header.board').offsetHeight;
   document.documentElement.style.setProperty('--tabtop',h+'px');
-  if(!canStore) toast('Aviso: este navegador bloqueou o salvamento automático — exporte o backup ao terminar.');
+  if(banco.modo()==='memoria')
+    toast('Este navegador bloqueou o salvamento — exporte o backup antes de fechar.');
 }
 window.addEventListener('resize',function(){
   var h=document.querySelector('header.board').offsetHeight;
   document.documentElement.style.setProperty('--tabtop',h+'px');
 });
-boot();
+
+iniciar().then(boot,function(e){
+  /* se o banco falhar de vez, o app ainda abre — só não guarda nada */
+  if(!P) P=perfilNovo('Meu scout');
+  if(!S) S=partidaNova(P);
+  boot();
+  toast('Não deu para abrir o banco local — exporte o backup ao terminar.');
+});
 })();
 </script>
