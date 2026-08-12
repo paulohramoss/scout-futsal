@@ -6,20 +6,35 @@ no próprio aparelho.
 
 ## O que dá para fazer
 
-- **Registro** — um toque por ação, por jogador. Painel separado para goleiro
-  (gol sofrido, defesa difícil, reposição). Cronômetro, placar, 1º/2º tempo e
-  cinco botões livres que você renomeia para o que quiser marcar.
+- **Registro** — um toque por ação, por jogador. Duas vistas, no botão
+  *Quadra / Lista* no topo da aba:
+  - **Quadra** — os cinco em quadra desenhados nas posições (gol, fixo, ala,
+    ala, pivô), cada um com o número e dois selos: erros em vermelho, acertos em
+    verde. Toca no jogador para marcar; os botões ficam nas laterais — **erros à
+    esquerda, acertos à direita**, agrupados (finalização, passe, disciplina...).
+    A barra **Reservas** abre o banco logo abaixo da quadra: com um jogador
+    selecionado, tocar num reserva faz a substituição, e ele entra na mesma
+    posição. Slot vazio tem um **+** que chama o banco direto.
+  - **Lista** — o formato antigo: fila de jogadores no topo e a grade cheia de
+    botões embaixo.
+
+  Painel separado para goleiro (gol sofrido, defesa, reposição, chute
+  certo/errado). Placar, **dois cronômetros — um para cada tempo** — e cinco
+  botões livres em que você troca a sigla *e* a descrição para o que quiser
+  marcar.
 - **Partidas** — vários scouts no mesmo aparelho, cada um com o próprio plantel
   e o próprio histórico de jogos. Reabra qualquer partida anterior.
 - **Campograma** — toca na quadra onde saiu a finalização; entra na conta do
   jogador selecionado e vira coordenada em metros na exportação.
 - **Estatísticas** — tabela por jogador, com totais e precisão de passe e chute.
+  Filtro **jogo todo / 1º tempo / 2º tempo** no topo, que também vale no relatório.
 - **Relatório** — o resumo da partida contra o adversário: placar, chutes,
   chutes a gol, precisão, **passes errados**, escanteios, faltas e cartões.
 - **Comparação** — dois jogadores lado a lado.
-- **Exportação** — CSV completo (relatório + estatísticas + botões livres +
-  campograma), resumo em texto para colar no grupo, impressão em PDF e backup
-  `.json` que reabre a partida inteira em outro aparelho.
+- **Exportação** — CSV completo (relatório + estatísticas **do jogo todo, do 1º
+  e do 2º tempo** + botões livres + campograma), resumo em texto para colar no
+  grupo, impressão em PDF e backup `.json` que reabre a partida inteira em outro
+  aparelho.
 
 ## Como usar sem internet
 
@@ -113,11 +128,18 @@ plano: ela entra no abrir seguinte. Fechar e abrir de novo resolve.
 
 **Linha:** G gol · A assistência · PC/PE passe certo/errado · CC/CE chute
 certo/errado · DE desarme · DO desarmado · FS/FC falta sofrida/cometida ·
-I impedimento · CA/CV cartões
+CA/CV cartões
 
-**Goleiro:** GS gol sofrido · DD defesa difícil · D defesa simples · F chute do
-adversário fora · PC/PE passe · RC/RE reposição · FS/FC falta · AI ação
-individual · CA/CV cartões
+**Goleiro:** GS gol sofrido · D defesa · F chute do adversário fora · CC/CE
+chute certo/errado (do goleiro) · PC/PE passe · RC/RE reposição · FS/FC falta ·
+AI ação individual · CA/CV cartões
+
+**Livres:** L1..L5 de fábrica — na aba Plantel você troca a sigla e a descrição
+de cada um. Por dentro o código continua L1..L5, então trocar a sigla no meio do
+jogo não perde o que já foi marcado.
+
+Partida antiga abre normal: **DD** (defesa difícil) vira **D**, e **I**
+(impedimento) some das tabelas mas continua no log e no CSV de eventos.
 
 **Equipe:** EF/EC escanteio a favor/contra · ACA/ACV cartão do adversário
 

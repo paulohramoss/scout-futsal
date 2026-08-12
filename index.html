@@ -81,6 +81,11 @@
   .vs{color:var(--muted);font-size:20px;font-weight:600}
   .clock{margin-left:auto;display:flex;align-items:center;gap:8px}
   .clock .t{font-family:var(--num);font-size:24px;font-weight:650;letter-spacing:-.01em}
+  .clock .per{display:flex;align-items:center;gap:6px;padding:6px 12px}
+  .clock .per .t{font-size:18px}
+  .clock .per[aria-pressed="true"]{background:var(--accent);color:var(--accent-ink);
+    border-color:var(--accent)}
+  .clock .tot{font-family:var(--num);font-size:12.5px;color:var(--muted)}
   .chipbtn{
     border:1px solid var(--line);background:var(--surface-2);border-radius:999px;
     padding:7px 13px;font-size:13px;font-weight:600;cursor:pointer;
@@ -106,9 +111,8 @@
     box-shadow:var(--shadow)}
 
   /* ---------- roster chips ---------- */
-  .roster{display:flex;gap:8px;overflow-x:auto;padding:12px 2px;scrollbar-width:none;
+  .roster{display:flex;flex-wrap:wrap;gap:6px;padding:10px 2px;
     position:sticky;top:calc(var(--tabtop,61px) + 45px);background:var(--paper);z-index:28}
-  .roster::-webkit-scrollbar{display:none}
   .pchip{
     flex:0 0 auto;display:flex;align-items:center;gap:8px;padding:8px 14px 8px 8px;
     background:var(--surface);border:1px solid var(--line);border-radius:999px;cursor:pointer;
@@ -120,6 +124,75 @@
   .pchip[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
   .pchip[aria-pressed="true"] .n{background:rgba(255,255,255,.22);color:inherit}
   .pchip[aria-pressed="true"].gk .n{background:var(--amarelo);color:#12100a}
+
+  /* tela estreita (iPad em pé, celular): chip menor para caber mais por linha */
+  @media (max-width:760px){
+    .pchip{padding:6px 11px 6px 6px;gap:6px}
+    .pchip .n{width:26px;height:26px;font-size:14px}
+    .pchip .nm{max-width:88px;font-size:13px}
+  }
+
+  /* ---------- filtro de tempo ---------- */
+  .segper{display:flex;gap:6px;flex-wrap:wrap;margin:18px 0 0}
+  .segper button{border:1px solid var(--line);background:var(--surface-2);border-radius:999px;
+    padding:7px 14px;font-size:13px;font-weight:600;cursor:pointer}
+  .segper button[aria-pressed="true"]{background:var(--accent);color:var(--accent-ink);
+    border-color:var(--accent)}
+  .segper button:active{transform:scale(.96)}
+
+  /* ---------- quadra ---------- */
+  .viewsw{display:flex;gap:6px;padding:12px 0 0}
+  .viewsw button{border:1px solid var(--line);background:var(--surface-2);border-radius:999px;
+    padding:6px 14px;font-size:13px;font-weight:600;cursor:pointer}
+  .viewsw button[aria-pressed="true"]{background:var(--accent);color:var(--accent-ink);
+    border-color:var(--accent)}
+  .quadraview{display:grid;gap:10px;padding:10px 0 0;align-items:start;
+    grid-template-columns:minmax(150px,1fr) minmax(220px,340px) minmax(150px,1fr)}
+  .quadraview[hidden]{display:none}
+  .courtwrap{position:relative;width:100%;max-width:min(320px,42vh);margin:0 auto}
+  .court{display:block;width:100%;height:auto}
+  .marks{position:absolute;inset:0}
+  .pnode{position:absolute;transform:translate(-50%,-50%);display:flex;flex-direction:column;
+    align-items:center;gap:2px;background:none;border:0;padding:0;cursor:pointer}
+  .pnode .ball{position:relative;width:50px;height:50px;border-radius:50%;
+    background:var(--surface);border:2px solid var(--line);display:grid;place-items:center;
+    font-family:var(--num);font-size:19px;font-weight:700;box-shadow:var(--shadow)}
+  .pnode.gk .ball{border-color:var(--amarelo)}
+  .pnode[aria-pressed="true"] .ball{background:var(--accent);color:var(--accent-ink);
+    border-color:var(--accent)}
+  .pnode.vago .ball{border-style:dashed;color:var(--muted);font-size:22px}
+  .pnode .nm{font-size:11px;font-weight:650;max-width:80px;overflow:hidden;
+    text-overflow:ellipsis;white-space:nowrap}
+  .pnode .pos{font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);
+    font-weight:700}
+  .pnode .bad{position:absolute;top:-3px;min-width:19px;height:19px;padding:0 4px;
+    border-radius:999px;display:grid;place-items:center;font-family:var(--num);font-size:11px;
+    font-weight:700;color:#fff;border:1.5px solid var(--paper)}
+  .pnode .bad.e{left:-9px;background:var(--vermelho)}
+  .pnode .bad.a{right:-9px;background:var(--accent)}
+  .resbar{width:100%;margin-top:12px;border:1px dashed var(--line);background:var(--surface-2);
+    border-radius:999px;padding:8px 14px;font-size:13px;font-weight:600;cursor:pointer}
+  .resbar:active{transform:scale(.98)}
+  .reslist{display:flex;flex-wrap:wrap;gap:6px;padding:10px 0 0}
+  .reslist[hidden]{display:none}
+  .livtit,.col h3{font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);
+    margin:14px 0 6px;font-weight:700}
+  .livres{display:grid;grid-template-columns:repeat(auto-fill,minmax(92px,1fr));gap:6px}
+  .col .sidetit{display:flex;align-items:center;gap:7px;font-size:12px;font-weight:700;
+    letter-spacing:.06em;text-transform:uppercase;padding:2px 0 6px}
+  .col .sidetit .dot{width:9px;height:9px;border-radius:50%;background:var(--vermelho)}
+  .col.pos .sidetit .dot{background:var(--accent)}
+  .col h3:first-of-type{margin-top:4px}
+  .act.slim{flex-direction:row;align-items:center;gap:8px;min-height:0;padding:8px 10px}
+  .act.slim .txt{display:flex;flex-direction:column;min-width:0}
+  .act.slim .code{font-size:13px}
+  .act.slim .desc{font-size:11px}
+  .act.slim .cnt{position:static;margin-left:auto;font-size:17px}
+  /* iPad em pé: quadra em cima, colunas de erro e acerto lado a lado embaixo */
+  @media (max-width:860px){
+    .quadraview{grid-template-columns:1fr 1fr}
+    .quadraview .mid{grid-column:1 / -1;order:-1}
+  }
 
   /* ---------- action grid ---------- */
   .grid{display:grid;gap:8px;grid-template-columns:repeat(auto-fill,minmax(104px,1fr))}
@@ -195,6 +268,8 @@
     width:100%;background:var(--surface-2);border:1px solid var(--line);border-radius:8px;
     padding:9px 10px;font-size:15px}
   .prow input[type=number]{font-family:var(--num);text-align:center}
+  .prow input.cod{text-align:center;font-weight:700;text-transform:uppercase;
+    font-family:var(--num);letter-spacing:.04em}
   .gkt{border:1px solid var(--line);border-radius:8px;padding:8px 11px;font-size:12.5px;
     font-weight:700;letter-spacing:.06em;cursor:pointer;background:var(--surface-2);color:var(--muted)}
   .gkt[aria-pressed="true"]{background:var(--amarelo);border-color:var(--amarelo);color:#12100a}
@@ -275,7 +350,8 @@
   @media print{
     @page{margin:12mm}
     html,body{background:#fff;color:#000}
-    header.board, nav.tabs, .bar, .roster, .toast{display:none !important}
+    header.board, nav.tabs, .bar, .roster, .toast,
+    .viewsw, .quadraview, #listaView{display:none !important}
     .wrap{padding:0;max-width:none}
     .printonly{display:block;margin:0 0 14px}
     .card,.rep,.tw,.pitchwrap{box-shadow:none}
@@ -302,8 +378,9 @@
     </div>
     <div class="clock">
       <button class="chipbtn" id="perfilBtn" title="Trocar de scout"><span>👤</span><span class="quem">—</span></button>
-      <button class="chipbtn" id="periodBtn" title="Alternar tempo">1º T</button>
-      <span class="t num" id="clockT">00:00</span>
+      <button class="chipbtn per" id="p1Btn" aria-pressed="true" title="Cronômetro do 1º tempo">1ºT <b class="t num" id="clock1">00:00</b></button>
+      <button class="chipbtn per" id="p2Btn" aria-pressed="false" title="Cronômetro do 2º tempo">2ºT <b class="t num" id="clock2">00:00</b></button>
+      <span class="tot" id="clockTot">Σ 00:00</span>
       <button class="chipbtn" id="clockBtn">Iniciar</button>
     </div>
   </div>
@@ -326,8 +403,27 @@
 
   <!-- ============ REGISTRO ============ -->
   <section id="registro">
-    <div class="roster" id="roster"></div>
-    <div class="grid" id="actGrid"></div>
+    <div class="viewsw" id="viewSw" role="group" aria-label="Modo de registro"></div>
+
+    <div class="quadraview" id="quadraView">
+      <div class="col" id="colErros"></div>
+      <div class="mid">
+        <div class="courtwrap">
+          <svg class="court" id="court" viewBox="0 0 200 400" aria-hidden="true"></svg>
+          <div class="marks" id="courtMarks"></div>
+        </div>
+        <button class="resbar" id="resBar" type="button" aria-expanded="false">Reservas (0)</button>
+        <div class="reslist" id="resList" hidden></div>
+        <h3 class="livtit">Livres</h3>
+        <div class="livres" id="livreGrid"></div>
+      </div>
+      <div class="col" id="colAcertos"></div>
+    </div>
+
+    <div id="listaView" hidden>
+      <div class="roster" id="roster"></div>
+      <div class="grid" id="actGrid"></div>
+    </div>
 
     <h2 class="sec">Equipe</h2>
     <div class="grid" id="teamGrid"></div>
@@ -357,6 +453,7 @@
 
   <!-- ============ ESTATÍSTICAS ============ -->
   <section id="estatisticas" hidden>
+    <div class="segper" id="segStats" role="group" aria-label="Filtrar por tempo"></div>
     <h2 class="sec">Jogadores de linha</h2>
     <div class="tw"><table id="tblLine"></table></div>
     <h2 class="sec">Goleiros</h2>
@@ -369,7 +466,8 @@
   <section id="relatorio" hidden>
     <div class="printonly" id="printHead"></div>
 
-    <h2 class="sec">Relatório geral da partida</h2>
+    <div class="segper" id="segRep" role="group" aria-label="Filtrar por tempo"></div>
+    <h2 class="sec">Relatório da partida</h2>
     <div class="rep" id="repBox"></div>
 
     <div class="bar">
@@ -434,7 +532,9 @@
       <span class="hint">Marque <b>GOL</b> para usar o painel de goleiro.</span>
     </div>
     <h2 class="sec">Botões livres</h2>
-    <p class="hint" style="margin:0 0 10px">Cinco contadores extras para o que você quiser marcar (pivô costas, 2ª trave, pressão alta...).</p>
+    <p class="hint" style="margin:0 0 10px">Cinco contadores extras para o que você quiser marcar
+    (pivô costas, 2ª trave, pressão alta...). A <b>sigla</b> da esquerda é o que aparece no botão,
+    no log e na planilha — troque pela letra que você usa.</p>
     <div class="plist" id="freeList"></div>
   </section>
 
@@ -500,35 +600,44 @@ if(!document.querySelector('meta[name=viewport]')){
 }
 
 /* ---------- dicionário de ações (fiel à planilha) ---------- */
+/* g = grupo na coluna · s = lado: 'a' acerto (direita), 'e' erro (esquerda) */
 var LINE=[
-  {c:'G',  d:'Gol',            k:'gol'},
-  {c:'A',  d:'Assistência',    k:'pos'},
-  {c:'PC', d:'Passe certo',    k:'pos'},
-  {c:'PE', d:'Passe errado',   k:'neg'},
-  {c:'CC', d:'Chute certo',    k:'pos'},
-  {c:'CE', d:'Chute errado',   k:'neg'},
-  {c:'DE', d:'Desarme',        k:'pos'},
-  {c:'DO', d:'Desarmado',      k:'neg'},
-  {c:'FS', d:'Falta sofrida',  k:'pos'},
-  {c:'FC', d:'Falta cometida', k:'neg'},
-  {c:'I',  d:'Impedimento',    k:'neg'},
-  {c:'CA', d:'Cartão amarelo', k:'ca'},
-  {c:'CV', d:'Cartão vermelho',k:'cv'}
+  {c:'G',  d:'Gol',            k:'gol', g:'Finalização', s:'a'},
+  {c:'CC', d:'Chute certo',    k:'pos', g:'Finalização', s:'a'},
+  {c:'CE', d:'Chute errado',   k:'neg', g:'Finalização', s:'e'},
+  {c:'A',  d:'Assistência',    k:'pos', g:'Passe',       s:'a'},
+  {c:'PC', d:'Passe certo',    k:'pos', g:'Passe',       s:'a'},
+  {c:'PE', d:'Passe errado',   k:'neg', g:'Passe',       s:'e'},
+  {c:'DE', d:'Desarme',        k:'pos', g:'Defesa',      s:'a'},
+  {c:'DO', d:'Desarmado',      k:'neg', g:'Perdas',      s:'e'},
+  {c:'FS', d:'Falta sofrida',  k:'pos', g:'Disciplina',  s:'a'},
+  {c:'FC', d:'Falta cometida', k:'neg', g:'Disciplina',  s:'e'},
+  {c:'CA', d:'Cartão amarelo', k:'ca',  g:'Disciplina',  s:'e'},
+  {c:'CV', d:'Cartão vermelho',k:'cv',  g:'Disciplina',  s:'e'}
 ];
 var GK=[
-  {c:'GS', d:'Gol sofrido',       k:'gol'},
-  {c:'DD', d:'Defesa difícil',    k:'pos'},
-  {c:'D',  d:'Defesa simples',    k:'pos'},
-  {c:'F',  d:'Chute do adv. fora',k:'pos'},
-  {c:'PC', d:'Passe certo',       k:'pos'},
-  {c:'PE', d:'Passe errado',      k:'neg'},
-  {c:'RC', d:'Reposição certa',   k:'pos'},
-  {c:'RE', d:'Reposição errada',  k:'neg'},
-  {c:'FS', d:'Falta sofrida',     k:'pos'},
-  {c:'FC', d:'Falta cometida',    k:'neg'},
-  {c:'AI', d:'Ação individual',   k:'pos'},
-  {c:'CA', d:'Cartão amarelo',    k:'ca'},
-  {c:'CV', d:'Cartão vermelho',   k:'cv'}
+  {c:'D',  d:'Defesa',            k:'pos', g:'Goleiro',     s:'a'},
+  {c:'F',  d:'Chute do adv. fora',k:'pos', g:'Goleiro',     s:'a'},
+  {c:'AI', d:'Ação individual',   k:'pos', g:'Goleiro',     s:'a'},
+  {c:'GS', d:'Gol sofrido',       k:'gol', g:'Goleiro',     s:'e'},
+  {c:'CC', d:'Chute certo',       k:'pos', g:'Finalização', s:'a'},
+  {c:'CE', d:'Chute errado',      k:'neg', g:'Finalização', s:'e'},
+  {c:'RC', d:'Reposição certa',   k:'pos', g:'Reposição',   s:'a'},
+  {c:'RE', d:'Reposição errada',  k:'neg', g:'Reposição',   s:'e'},
+  {c:'PC', d:'Passe certo',       k:'pos', g:'Passe',       s:'a'},
+  {c:'PE', d:'Passe errado',      k:'neg', g:'Passe',       s:'e'},
+  {c:'FS', d:'Falta sofrida',     k:'pos', g:'Disciplina',  s:'a'},
+  {c:'FC', d:'Falta cometida',    k:'neg', g:'Disciplina',  s:'e'},
+  {c:'CA', d:'Cartão amarelo',    k:'ca',  g:'Disciplina',  s:'e'},
+  {c:'CV', d:'Cartão vermelho',   k:'cv',  g:'Disciplina',  s:'e'}
+];
+/* as cinco posições da quadra, na ordem dos slots (0 = gol) */
+var SLOTS=[
+  {p:'GOL',  x:50, y:87},
+  {p:'FIXO', x:50, y:65},
+  {p:'ALA',  x:16, y:44},
+  {p:'ALA',  x:84, y:44},
+  {p:'PIVÔ', x:50, y:19}
 ];
 var TEAM=[
   {c:'EF', d:'Escanteio a favor',   k:'pos'},
@@ -539,6 +648,20 @@ var TEAM=[
 var FREE=['L1','L2','L3','L4','L5'];
 var DESC={};
 LINE.concat(GK,TEAM).forEach(function(a){DESC[a.c]=a.d;});
+/* código que saiu do app mas ainda aparece em partida antiga */
+DESC.I='Impedimento (antigo)';
+
+/* Botão livre: por dentro o código é sempre L1..L5 — é o que fica gravado no
+   evento. O scout escolhe a sigla que aparece na tela e a descrição dela. */
+function sigla(c){
+  var i=FREE.indexOf(c);
+  return (i>=0 && S && S.freeCodes && S.freeCodes[i]) ? S.freeCodes[i] : c;
+}
+function descr(c){
+  var i=FREE.indexOf(c);
+  if(i<0) return DESC[c]||'';
+  return (S&&S.freeLabels&&S.freeLabels[i])||('Livre '+(i+1));
+}
 
 var SHOTS=[
   {m:'G', label:'Gol',       color:'var(--gol)'},
@@ -675,20 +798,44 @@ function plantelPadrao(){
   return ps;
 }
 function labelsPadrao(){ return ['Livre 1','Livre 2','Livre 3','Livre 4','Livre 5']; }
+function codigosPadrao(){ return FREE.slice(); }
+/* Quadra: cinco slots. Quem não tem slot está no banco. Plantel antigo (e
+   plantel novo) entra aqui e sai com o primeiro goleiro no gol e os quatro
+   primeiros de linha no resto. */
+function montaQuadra(ps){
+  var i,q,tem=false;
+  for(i=0;i<ps.length;i++) if(ps[i].court) tem=true;
+  if(tem) return ps;
+  ps.forEach(function(p){ p.court=false; p.slot=null; });
+  var gk=null;
+  for(i=0;i<ps.length;i++) if(ps[i].gk){ gk=ps[i]; break; }
+  if(!gk) gk=ps[0];
+  if(gk){ gk.court=true; gk.slot=0; }
+  var sl=1;
+  for(i=0;i<ps.length&&sl<5;i++){
+    q=ps[i];
+    if(q.court) continue;
+    q.court=true; q.slot=sl++;
+  }
+  return ps;
+}
 
 function perfilNovo(nome){
   return { id:uid('u'), nome:nome||'Meu scout', pin:'', time:'Minha equipe',
-           plantel:plantelPadrao(), freeLabels:labelsPadrao(), criado:Date.now() };
+           plantel:plantelPadrao(), freeLabels:labelsPadrao(), freeCodes:codigosPadrao(),
+           criado:Date.now() };
 }
 function partidaNova(perfil){
-  var ps = perfil ? copia(perfil.plantel) : plantelPadrao();
+  var ps = montaQuadra(perfil ? copia(perfil.plantel) : plantelPadrao());
   return {
     id:uid('m'), perfil:perfil?perfil.id:null,
     criada:Date.now(), atualizada:Date.now(),
     team:perfil?perfil.time:'Minha equipe', opp:'Adversário',
     players:ps, events:[], shots:[],
     freeLabels:perfil?copia(perfil.freeLabels):labelsPadrao(),
-    clock:{sec:0,running:false,started:0}, period:1,
+    freeCodes:(perfil&&perfil.freeCodes)?copia(perfil.freeCodes):codigosPadrao(),
+    /* um cronômetro por tempo; run diz qual deles está andando agora */
+    clocks:{1:0,2:0}, run:{on:false,started:0}, period:1, view:'quadra',
     sel:(ps[0]||{}).id, shotMode:'G'
   };
 }
@@ -698,13 +845,27 @@ function normaliza(m){
   if(!m.events) m.events=[];
   if(!m.shots) m.shots=[];
   if(!m.freeLabels) m.freeLabels=labelsPadrao();
+  if(!m.freeCodes) m.freeCodes=codigosPadrao();
   if(!m.period) m.period=1;
+  if(m.view!=='lista') m.view='quadra';
+  montaQuadra(m.players);
   if(!m.criada) m.criada=Date.now();
   if(!m.sel||!m.players.some(function(p){return p.id===m.sel;})) m.sel=(m.players[0]||{}).id;
   if(!m.shotMode) m.shotMode='G';
+  /* dois cronômetros, um por tempo. Partida antiga tinha um só: o que estava
+     nele entra no tempo em que a partida parou. */
+  if(!m.clocks){
+    m.clocks={1:0,2:0};
+    m.clocks[m.period]=(m.clock&&m.clock.sec)||0;
+  }
+  if(m.clocks[1]==null) m.clocks[1]=0;
+  if(m.clocks[2]==null) m.clocks[2]=0;
+  delete m.clock;
   /* cronômetro nunca volta correndo: senão o tempo que o app ficou fechado
      entrava no jogo. Reabriu, o scout aperta Iniciar de novo. */
-  m.clock={sec:(m.clock&&m.clock.sec)||0, running:false, started:0};
+  m.run={on:false,started:0};
+  /* DD (defesa difícil) virou D: agora é um botão de defesa só */
+  for(var i=0;i<m.events.length;i++) if(m.events[i].c==='DD') m.events[i].c='D';
   return m;
 }
 
@@ -714,7 +875,8 @@ function save(){
   S.atualizada=Date.now();
   /* o plantel e os botões livres da partida viram o padrão do perfil,
      para a próxima partida já nascer com o time certo */
-  if(P){ P.plantel=copia(S.players); P.freeLabels=copia(S.freeLabels); P.time=S.team; }
+  if(P){ P.plantel=copia(S.players); P.freeLabels=copia(S.freeLabels);
+         P.freeCodes=copia(S.freeCodes); P.time=S.team; }
   clearTimeout(aguardaSave);
   aguardaSave=setTimeout(gravaJa,300);
 }
@@ -756,6 +918,7 @@ function iniciar(){
       if(velho){
         P.plantel=velho.players;
         P.freeLabels=velho.freeLabels||labelsPadrao();
+        P.freeCodes=velho.freeCodes||codigosPadrao();
         P.time=velho.team||'Minha equipe';
         CFG.theme=velho.theme||CFG.theme;
       }
@@ -764,7 +927,8 @@ function iniciar(){
         S.team=velho.team||S.team; S.opp=velho.opp||S.opp;
         S.players=velho.players; S.events=velho.events||[]; S.shots=velho.shots||[];
         S.freeLabels=velho.freeLabels||S.freeLabels;
-        S.period=velho.period||1; S.sel=velho.sel; S.clock=velho.clock;
+        S.period=velho.period||1; S.sel=velho.sel;
+        S.clocks=null; S.clock=velho.clock;
         normaliza(S);
       }
       return;
@@ -789,7 +953,13 @@ function el(t,c,x){var e=document.createElement(t);if(c)e.className=c;if(x!=null
 function player(id){for(var i=0;i<S.players.length;i++) if(S.players[i].id===id) return S.players[i];return null;}
 function fmt(sec){var m=Math.floor(sec/60),s=Math.floor(sec%60);
   return (m<10?'0':'')+m+':'+(s<10?'0':'')+s;}
-function now(){ var c=S.clock; return c.running ? c.sec+(Date.now()-c.started)/1000 : c.sec; }
+/* tempo de cada período; só o período atual pode estar correndo */
+function tempoDe(per){
+  var b=(S.clocks&&S.clocks[per])||0;
+  return (per===S.period && S.run.on) ? b+(Date.now()-S.run.started)/1000 : b;
+}
+function tempoTotal(){ return tempoDe(1)+tempoDe(2); }
+function now(){ return tempoDe(S.period); }
 function toast(msg){var t=$('#toast');t.textContent=msg;t.classList.add('on');
   clearTimeout(toast._i);toast._i=setTimeout(function(){t.classList.remove('on');},1600);}
 
@@ -814,6 +984,38 @@ function sumAll(code,gk){
 }
 function pct(a,b){ return b>0 ? Math.round(a*1000/b)/10 : 0; }
 
+/* Filtro de tempo das Estatísticas e do Relatório: 0 = jogo todo, 1 = 1º, 2 = 2º.
+   Os botões da aba Registro nunca usam o filtro — lá o número é sempre do jogo
+   inteiro, senão o scout marcaria olhando um contador que não é o dele. */
+var PERF=0;
+function noFiltro(e){ return !PERF || e.per===PERF; }
+function rotuloFiltro(){ return PERF? PERF+'º tempo' : 'jogo todo'; }
+function countF(pid,code){
+  var n=0,e;
+  for(var i=0;i<S.events.length;i++){
+    e=S.events[i];
+    if(e.p===pid&&e.c===code&&noFiltro(e))n++;
+  }
+  return n;
+}
+function teamCountF(code){
+  var n=0,e;
+  for(var i=0;i<S.events.length;i++){
+    e=S.events[i];
+    if(e.p===null&&e.c===code&&noFiltro(e))n++;
+  }
+  return n;
+}
+function sumAllF(code,gk){
+  var n=0;
+  for(var i=0;i<S.players.length;i++){
+    var p=S.players[i];
+    if(gk!==undefined && !!p.gk!==gk) continue;
+    n+=countF(p.id,code);
+  }
+  return n;
+}
+
 /* ---------- registrar / desfazer ---------- */
 function log(pid,code,extra){
   var ev={p:pid,c:code,t:Math.round(now()),per:S.period,id:Date.now()+Math.random()};
@@ -825,31 +1027,47 @@ function undoLast(){
   var e=S.events.pop();
   for(var i=S.shots.length-1;i>=0;i--) if(S.shots[i].ev===e.id){S.shots.splice(i,1);break;}
   save(); renderAll();
-  toast('Desfeito: '+e.c+(e.p?' · '+(player(e.p)||{name:'?'}).name:' · equipe'));
+  toast('Desfeito: '+sigla(e.c)+(e.p?' · '+(player(e.p)||{name:'?'}).name:' · equipe'));
 }
 
 /* ---------- relógio ---------- */
-function tickClock(){ $('#clockT').textContent=fmt(now()); }
+function tickClock(){
+  $('#clock1').textContent=fmt(tempoDe(1));
+  $('#clock2').textContent=fmt(tempoDe(2));
+  $('#clockTot').textContent='Σ '+fmt(tempoTotal());
+  $('#p1Btn').setAttribute('aria-pressed',String(S.period===1));
+  $('#p2Btn').setAttribute('aria-pressed',String(S.period===2));
+}
 /* com o relógio andando, grava o tempo a cada 5s: se o app fechar no meio do
    jogo, volta no minuto certo em vez de voltar no último Pausar */
 var tiques=0;
 setInterval(function(){
-  if(!S||!S.clock.running) return;
+  if(!S||!S.run.on) return;
   tickClock();
-  if(++tiques>=10){ tiques=0; S.clock.sec=now(); S.clock.started=Date.now(); save(); }
+  if(++tiques>=10){ tiques=0; S.clocks[S.period]=now(); S.run.started=Date.now(); save(); }
 },500);
 
+function paraRelogio(){
+  if(!S.run.on) return;
+  S.clocks[S.period]=now(); S.run.on=false;
+  $('#clockBtn').textContent='Iniciar';
+  $('#clockBtn').classList.remove('on');
+}
 $('#clockBtn').addEventListener('click',function(){
-  var c=S.clock;
-  if(c.running){ c.sec=now(); c.running=false; }
-  else { c.started=Date.now(); c.running=true; }
-  this.textContent=c.running?'Pausar':'Iniciar';
-  this.classList.toggle('on',c.running);
+  if(S.run.on){ paraRelogio(); }
+  else { S.run.started=Date.now(); S.run.on=true;
+         this.textContent='Pausar'; this.classList.add('on'); }
   save(); tickClock();
 });
-$('#periodBtn').addEventListener('click',function(){
-  S.period=S.period===1?2:1; this.textContent=S.period+'º T'; save();
-});
+/* trocar de tempo sempre para o relógio: o que roda é o do tempo escolhido */
+function trocaTempo(per){
+  if(S.period===per) return;
+  paraRelogio();
+  S.period=per; save(); tickClock();
+  toast(per+'º tempo — toque em Iniciar');
+}
+$('#p1Btn').addEventListener('click',function(){trocaTempo(1);});
+$('#p2Btn').addEventListener('click',function(){trocaTempo(2);});
 
 /* ---------- placar / nomes ---------- */
 $('#teamName').addEventListener('input',function(){S.team=this.value;save();});
@@ -881,14 +1099,17 @@ function actButton(code,desc,kind,pid){
   b.setAttribute('data-has',n>0?'1':'0');
   var c=el('span','cnt',String(n));
   var box=el('div');
-  box.appendChild(el('span','code',code));
+  box.appendChild(el('span','code',sigla(code)));
   b.appendChild(c); b.appendChild(box); b.appendChild(el('span','desc',desc));
+  ligaAct(b,pid,code);
+  return b;
+}
+function ligaAct(b,pid,code){
   b.addEventListener('click',function(){
     log(pid,code);
     b.classList.remove('flash'); void b.offsetWidth; b.classList.add('flash');
     if(navigator.vibrate) navigator.vibrate(8);
   });
-  return b;
 }
 function renderActions(){
   var g=$('#actGrid'); g.textContent='';
@@ -897,12 +1118,165 @@ function renderActions(){
   else{
     var set=p.gk?GK:LINE;
     set.forEach(function(a){ g.appendChild(actButton(a.c,a.d,a.k,p.id)); });
-    FREE.forEach(function(code,i){
-      g.appendChild(actButton(code,S.freeLabels[i]||('Livre '+(i+1)),'free',p.id));
+    FREE.forEach(function(code){
+      g.appendChild(actButton(code,descr(code),'free',p.id));
     });
   }
   var t=$('#teamGrid'); t.textContent='';
   TEAM.forEach(function(a){ t.appendChild(actButton(a.c,a.d,a.k,null)); });
+}
+
+/* ---------- quadra ---------- */
+/* Cinco slots na quadra; o resto é banco. Toca no jogador para escolher quem
+   está sendo marcado; toca em Reservas para trocar quem está selecionado. */
+var resAberto=false, slotVago=null;
+
+function noBanco(){ return S.players.filter(function(p){return !p.court;}); }
+function doSlot(i){
+  for(var k=0;k<S.players.length;k++)
+    if(S.players[k].court&&S.players[k].slot===i) return S.players[k];
+  return null;
+}
+/* os dois selos do círculo: quanto o jogador acertou e quanto errou */
+function saldo(p){
+  var set=p.gk?GK:LINE, a=0, e=0;
+  set.forEach(function(x){ var n=count(p.id,x.c); if(x.s==='a') a+=n; else e+=n; });
+  return {a:a,e:e};
+}
+
+function renderViewSw(){
+  var box=$('#viewSw'); box.textContent='';
+  [['quadra','Quadra'],['lista','Lista']].forEach(function(o){
+    var b=el('button',null,o[1]); b.type='button';
+    b.setAttribute('aria-pressed',String(S.view===o[0]));
+    b.addEventListener('click',function(){ S.view=o[0]; save(); renderAll(); });
+    box.appendChild(b);
+  });
+  $('#quadraView').hidden = S.view!=='quadra';
+  $('#listaView').hidden  = S.view!=='lista';
+}
+
+/* quadra em pé: 20 x 40 m -> viewBox 200 x 400 (10 px = 1 m); nosso gol embaixo */
+function renderCourt(){
+  var p=$('#court'); if(!p) return;
+  p.textContent='';
+  var line=getComputedStyle(document.documentElement).getPropertyValue('--line').trim();
+  var soft=getComputedStyle(document.documentElement).getPropertyValue('--surface-2').trim();
+  p.appendChild(sv('rect',{x:0,y:0,width:200,height:400,fill:soft,rx:8}));
+  var st={fill:'none',stroke:line,'stroke-width':1.6};
+  function add(t,a){var e=sv(t,a);for(var k in st) if(!(k in a)) e.setAttribute(k,st[k]);p.appendChild(e);return e;}
+  add('rect',{x:8,y:8,width:184,height:384});
+  add('line',{x1:8,y1:200,x2:192,y2:200});
+  add('circle',{cx:100,cy:200,r:30});
+  // áreas: quarto de círculo de 6 m a partir de cada poste
+  add('path',{d:'M25,8 A60,60 0 0 0 85,68 L115,68 A60,60 0 0 0 175,8'});
+  add('path',{d:'M25,392 A60,60 0 0 1 85,332 L115,332 A60,60 0 0 1 175,392'});
+  // marcas de penálti (6 m) e segundo penálti (10 m)
+  [[100,68],[100,332],[100,108],[100,292]].forEach(function(c){
+    p.appendChild(sv('circle',{cx:c[0],cy:c[1],r:2.5,fill:line}));
+  });
+  add('rect',{x:85,y:2,width:30,height:6});
+  add('rect',{x:85,y:392,width:30,height:6});
+}
+
+function renderQuadra(){
+  renderCourt();
+  var box=$('#courtMarks'); box.textContent='';
+  SLOTS.forEach(function(sl,i){
+    var p=doSlot(i);
+    var b=el('button','pnode'+(p?(p.gk?' gk':''):' vago')); b.type='button';
+    b.style.left=sl.x+'%'; b.style.top=sl.y+'%';
+    b.setAttribute('aria-pressed',String(!!p&&S.sel===p.id));
+    var ball=el('div','ball',p?String(p.num):'+');
+    if(p){
+      var sd=saldo(p);
+      ball.appendChild(el('span','bad e',String(sd.e)));
+      ball.appendChild(el('span','bad a',String(sd.a)));
+    }
+    b.appendChild(ball);
+    b.appendChild(el('span','nm',p?p.name:'Vazio'));
+    b.appendChild(el('span','pos',sl.p));
+    b.addEventListener('click',function(){
+      if(p){ slotVago=null; S.sel=p.id; save(); renderAll(); }
+      else{ slotVago=i; resAberto=true; renderReservas(); toast('Escolha quem entra'); }
+    });
+    box.appendChild(b);
+  });
+}
+
+function renderReservas(){
+  var banco=noBanco();
+  $('#resBar').textContent='Reservas ('+banco.length+')'+(resAberto?' ▾':' ▸');
+  $('#resBar').setAttribute('aria-expanded',String(resAberto));
+  var box=$('#resList'); box.hidden=!resAberto; box.textContent='';
+  if(!resAberto) return;
+  if(!banco.length){ box.appendChild(el('span','hint','Todo mundo está em quadra.')); return; }
+  banco.forEach(function(p){
+    var b=el('button','pchip'+(p.gk?' gk':'')); b.type='button';
+    b.appendChild(el('span','n',String(p.num)));
+    b.appendChild(el('span','nm',p.name));
+    b.addEventListener('click',function(){ entraEmQuadra(p); });
+    box.appendChild(b);
+  });
+}
+/* reserva entra: no slot vazio que o scout tocou, ou no lugar de quem está selecionado */
+function entraEmQuadra(p){
+  if(slotVago!=null){
+    p.court=true; p.slot=slotVago; slotVago=null;
+    S.sel=p.id; save(); renderAll();
+    toast('Entra '+p.num+' '+p.name);
+    return;
+  }
+  var sai=player(S.sel);
+  if(!sai||!sai.court){ toast('Toque primeiro em quem sai da quadra'); return; }
+  p.court=true; p.slot=sai.slot;
+  sai.court=false; sai.slot=null;
+  S.sel=p.id; save(); renderAll();
+  toast('Entra '+p.num+' '+p.name+' · sai '+sai.num+' '+sai.name);
+}
+$('#resBar').addEventListener('click',function(){ resAberto=!resAberto; renderReservas(); });
+
+/* botão estreito das colunas: sigla, descrição e o contador na direita */
+function actSlim(a,pid){
+  var b=el('button','act slim'); b.type='button';
+  b.setAttribute('data-kind',a.k);
+  var n=count(pid,a.c);
+  b.setAttribute('data-has',n>0?'1':'0');
+  var t=el('div','txt');
+  t.appendChild(el('span','code',sigla(a.c)));
+  t.appendChild(el('span','desc',a.d));
+  b.appendChild(t);
+  b.appendChild(el('span','cnt',String(n)));
+  ligaAct(b,pid,a.c);
+  return b;
+}
+function renderColuna(sel,titulo,lado,p,cls){
+  var box=$(sel); box.textContent='';
+  box.className='col'+(cls?' '+cls:'');
+  var t=el('div','sidetit');
+  t.appendChild(el('span','dot')); t.appendChild(el('span',null,titulo));
+  box.appendChild(t);
+  if(!p) return;
+  var set=p.gk?GK:LINE, ordem=[], mapa={};
+  set.forEach(function(a){
+    if(a.s!==lado) return;
+    if(!mapa[a.g]){ mapa[a.g]=[]; ordem.push(a.g); }
+    mapa[a.g].push(a);
+  });
+  ordem.forEach(function(g){
+    box.appendChild(el('h3',null,g));
+    mapa[g].forEach(function(a){ box.appendChild(actSlim(a,p.id)); });
+  });
+}
+function renderQuadraActions(){
+  var p=player(S.sel);
+  renderColuna('#colErros','Erros','e',p,'neg');
+  renderColuna('#colAcertos','Acertos','a',p,'pos');
+  var lb=$('#livreGrid'); lb.textContent='';
+  if(!p) return;
+  FREE.forEach(function(c){
+    lb.appendChild(actSlim({c:c,d:descr(c),k:'free'},p.id));
+  });
 }
 
 /* ---------- log ---------- */
@@ -913,15 +1287,15 @@ function renderLog(){
   evs.forEach(function(e){
     var r=el('div','logrow');
     r.appendChild(el('span','tm',e.per+'T '+fmt(e.t)));
-    r.appendChild(el('span','cd',e.c));
+    r.appendChild(el('span','cd',sigla(e.c)));
     var nm = e.p ? ((player(e.p)||{num:'?',name:'—'}).num+' · '+(player(e.p)||{name:'—'}).name) : 'Equipe';
     r.appendChild(el('span','',nm));
-    r.appendChild(el('span','hint',DESC[e.c]||S.freeLabels[FREE.indexOf(e.c)]||''));
+    r.appendChild(el('span','hint',descr(e.c)));
     box.appendChild(r);
   });
   var last=S.events[S.events.length-1];
   $('#lastInfo').textContent = last
-    ? 'Último: '+last.c+' — '+(last.p?(player(last.p)||{name:'—'}).name:'equipe')+' aos '+fmt(last.t)+' do '+last.per+'º tempo.'
+    ? 'Último: '+sigla(last.c)+' — '+(last.p?(player(last.p)||{name:'—'}).name:'equipe')+' aos '+fmt(last.t)+' do '+last.per+'º tempo.'
     : 'Nenhum registro ainda.';
   $('#undoBtn').disabled=!S.events.length;
 }
@@ -983,7 +1357,6 @@ function renderPitch(){
   p.onclick=function(ev){
     var pl=player(S.sel);
     if(!pl){toast('Selecione um jogador na aba Registro');return;}
-    if(pl.gk){toast('Campograma é para finalizações de jogadores de linha');return;}
     var r=p.getBoundingClientRect();
     var x=(ev.clientX-r.left)/r.width*400, y=(ev.clientY-r.top)/r.height*200;
     var e=log(pl.id,S.shotMode,{x:x,y:y});
@@ -1014,25 +1387,27 @@ $('#clearShots').addEventListener('click',function(){
 });
 
 /* ---------- estatísticas ---------- */
-var COLS_LINE=['G','A','PC','PE','T','%','CC','CE','T','%','DE','DO','FS','FC','I','CA','CV'];
-var COLS_GK  =['GS','DD','PC','PE','T','%','RC','RE','T','%','D','F','FS','FC','AI','CA','CV'];
+var COLS_LINE=['G','A','PC','PE','T','%','CC','CE','T','%','DE','DO','FS','FC','CA','CV'];
+var COLS_GK  =['GS','D','F','CC','CE','T','%','PC','PE','T','%','RC','RE','T','%','FS','FC','AI','CA','CV'];
 
 /* T e % de chute incluem o gol: gol é finalização no alvo.
    Assim o scout toca só "G" quando sai gol, sem precisar tocar CC junto. */
 function vals(c,gk){
   if(gk){
-    var tp=c('PC')+c('PE'), tr=c('RC')+c('RE');
-    return [c('GS'),c('DD'),c('PC'),c('PE'),tp,pct(c('PC'),tp),c('RC'),c('RE'),tr,pct(c('RC'),tr),
-            c('D'),c('F'),c('FS'),c('FC'),c('AI'),c('CA'),c('CV')];
+    var tp=c('PC')+c('PE'), tr=c('RC')+c('RE'), tcg=c('G')+c('CC')+c('CE');
+    return [c('GS'),c('D'),c('F'),c('CC'),c('CE'),tcg,pct(c('G')+c('CC'),tcg),
+            c('PC'),c('PE'),tp,pct(c('PC'),tp),c('RC'),c('RE'),tr,pct(c('RC'),tr),
+            c('FS'),c('FC'),c('AI'),c('CA'),c('CV')];
   }
   var tp2=c('PC')+c('PE'), tc=c('G')+c('CC')+c('CE');
   return [c('G'),c('A'),c('PC'),c('PE'),tp2,pct(c('PC'),tp2),c('CC'),c('CE'),tc,pct(c('G')+c('CC'),tc),
-          c('DE'),c('DO'),c('FS'),c('FC'),c('I'),c('CA'),c('CV')];
+          c('DE'),c('DO'),c('FS'),c('FC'),c('CA'),c('CV')];
 }
-function rowVals(p){ return vals(function(x){return count(p.id,x);}, p.gk); }
+/* as tabelas respeitam o filtro de tempo; a aba Registro não */
+function rowVals(p){ return vals(function(x){return countF(p.id,x);}, p.gk); }
 function groupVals(players){
   return vals(function(x){
-    var n=0; players.forEach(function(p){n+=count(p.id,x);}); return n;
+    var n=0; players.forEach(function(p){n+=countF(p.id,x);}); return n;
   }, players.length? !!players[0].gk : false);
 }
 function buildTable(tbl,cols,players){
@@ -1063,6 +1438,21 @@ function buildTable(tbl,cols,players){
   tb.appendChild(tr2);
   tbl.appendChild(tb);
 }
+var PER_OPTS=[[0,'Jogo todo'],[1,'1º tempo'],[2,'2º tempo']];
+function renderPerFiltro(){
+  ['#segStats','#segRep'].forEach(function(sel){
+    var box=$(sel); if(!box) return;
+    box.textContent='';
+    PER_OPTS.forEach(function(o){
+      var b=el('button',null,o[1]); b.type='button';
+      b.setAttribute('aria-pressed',String(PERF===o[0]));
+      b.addEventListener('click',function(){
+        PERF=o[0]; renderPerFiltro(); renderStats(); renderReport(); renderCompare();
+      });
+      box.appendChild(b);
+    });
+  });
+}
 function renderStats(){
   var line=S.players.filter(function(p){return !p.gk;});
   var gks =S.players.filter(function(p){return  p.gk;});
@@ -1082,11 +1472,11 @@ function repRow(a,k,b,head){
 /* Linhas do relatório em forma de dados — a tela, o CSV e o TXT usam esta mesma fonte,
    então nunca saem diferentes um do outro. */
 function reportRows(){
-  var usG=sumAll('G'), thG=sumAll('GS');
-  var usOn=usG+sumAll('CC'), usTot=usOn+sumAll('CE');
+  var usG=sumAllF('G'), thG=sumAllF('GS');
+  var usOn=usG+sumAllF('CC'), usTot=usOn+sumAllF('CE');
   // chutes do adversário: gols sofridos + defesas do goleiro + chutes pra fora
-  var thOn=sumAll('DD',true)+sumAll('D',true)+thG, thTot=thOn+sumAll('F',true);
-  var pe=sumAll('PE'), pc=sumAll('PC');
+  var thOn=sumAllF('D',true)+thG, thTot=thOn+sumAllF('F',true);
+  var pe=sumAllF('PE'), pc=sumAllF('PC');
 
   var r=[
     ['Placar',          String(usG),   String(thG)],
@@ -1101,10 +1491,10 @@ function reportRows(){
     r.push(['Passes certos', String(pc), '—']);
     r.push(['Precisão de passe', pct(pc,pc+pe).toFixed(1)+'%', '—']);
   }
-  r.push(['Escanteios',      String(teamCount('EF')), String(teamCount('EC'))]);
-  r.push(['Faltas sofridas', String(sumAll('FS')),    String(sumAll('FC'))]);
-  r.push(['Cartão amarelo',  String(sumAll('CA')),    String(teamCount('ACA'))]);
-  r.push(['Cartão vermelho', String(sumAll('CV')),    String(teamCount('ACV'))]);
+  r.push(['Escanteios',      String(teamCountF('EF')), String(teamCountF('EC'))]);
+  r.push(['Faltas sofridas', String(sumAllF('FS')),    String(sumAllF('FC'))]);
+  r.push(['Cartão amarelo',  String(sumAllF('CA')),    String(teamCountF('ACA'))]);
+  r.push(['Cartão vermelho', String(sumAllF('CV')),    String(teamCountF('ACV'))]);
   return r;
 }
 function renderReport(){
@@ -1121,19 +1511,20 @@ function renderReport(){
   var ph=$('#printHead'); ph.textContent='';
   var h1=el('h1',null,(S.team||'Nós')+'  '+sumAll('G')+' × '+sumAll('GS')+'  '+(S.opp||'Adversário'));
   ph.appendChild(h1);
-  ph.appendChild(el('div','sub','Relatório da partida · '+dateBR()+' · '+S.events.length+' registros'));
+  ph.appendChild(el('div','sub','Relatório da partida · '+dateBR()+' · '+rotuloFiltro()+
+    ' · 1ºT '+fmt(tempoDe(1))+' · 2ºT '+fmt(tempoDe(2))+' · '+S.events.length+' registros'));
 
   var t=$('#tblFree'); t.textContent='';
   var thead=el('thead'),tr=el('tr');
   tr.appendChild(el('th','l','#')); tr.appendChild(el('th','l','Jogador'));
-  S.freeLabels.forEach(function(l){tr.appendChild(el('th','num',l));});
+  S.freeLabels.forEach(function(l,i){tr.appendChild(el('th','num',sigla(FREE[i])+' · '+l));});
   thead.appendChild(tr); t.appendChild(thead);
   var tb=el('tbody');
   S.players.forEach(function(p){
     var r=el('tr');
     r.appendChild(el('td','l num',String(p.num)));
     r.appendChild(el('td','l',p.name));
-    FREE.forEach(function(c){var n=count(p.id,c);r.appendChild(el('td','num'+(n?'':' z'),String(n)));});
+    FREE.forEach(function(c){var n=countF(p.id,c);r.appendChild(el('td','num'+(n?'':' z'),String(n)));});
     tb.appendChild(r);
   });
   t.appendChild(tb);
@@ -1198,17 +1589,27 @@ function renderPlantel(){
   });
   var fb=$('#freeList'); fb.textContent='';
   S.freeLabels.forEach(function(l,i){
-    var r=el('div','prow'); r.style.gridTemplateColumns='64px 1fr';
-    var tag=el('div','gkt',FREE[i]); tag.style.textAlign='center';
+    var r=el('div','prow'); r.style.gridTemplateColumns='72px 1fr';
+    var cod=el('input','cod'); cod.type='text'; cod.value=sigla(FREE[i]);
+    cod.maxLength=4; cod.setAttribute('aria-label','Sigla do botão livre '+(i+1));
+    cod.addEventListener('input',function(){
+      S.freeCodes[i]=this.value.slice(0,4);
+      save();renderActions();renderLog();renderReport();renderLegend();
+    });
     var inp=el('input'); inp.type='text'; inp.value=l;
-    inp.addEventListener('input',function(){S.freeLabels[i]=this.value;save();renderActions();renderReport();});
-    r.appendChild(tag);r.appendChild(inp);
+    inp.setAttribute('aria-label','Descrição do botão livre '+(i+1));
+    inp.addEventListener('input',function(){
+      S.freeLabels[i]=this.value;
+      save();renderActions();renderLog();renderReport();renderLegend();
+    });
+    r.appendChild(cod);r.appendChild(inp);
     fb.appendChild(r);
   });
 }
 $('#addPlayer').addEventListener('click',function(){
   var mx=0; S.players.forEach(function(p){if(p.num>mx)mx=p.num;});
-  S.players.push({id:'p'+Date.now(),num:mx+1,name:'Jogador '+(S.players.length+1),gk:false});
+  S.players.push({id:'p'+Date.now(),num:mx+1,name:'Jogador '+(S.players.length+1),
+                  gk:false,court:false,slot:null});
   save(); renderAll();
 });
 
@@ -1397,7 +1798,7 @@ function renderLegend(){
     if(parts.indexOf(a.c)<0) parts.push('<b>'+a.c+'</b> '+a.d);
   });
   parts.push('<b>T</b> Total · <b>%</b> Precisão');
-  S.freeLabels.forEach(function(l,i){parts.push('<b>'+FREE[i]+'</b> '+l);});
+  S.freeLabels.forEach(function(l,i){parts.push('<b>'+sigla(FREE[i])+'</b> '+l);});
   $('#legend').innerHTML=parts.join(' &nbsp;·&nbsp; ')+
     '<br><br>Precisão de passe = PC ÷ (PC+PE). Precisão de chute = (G+CC) ÷ (G+CC+CE): o gol já conta como '+
     'finalização no alvo, então em gol você toca só <b>G</b>. Na planilha antiga o gol ficava fora dessa conta.';
@@ -1427,8 +1828,8 @@ function fileName(prefix,ext){
   return prefix+'_'+slug(S.team)+'-x-'+slug(S.opp)+'_'+dateISO()+'.'+ext;
 }
 /* COLS_LINE/COLS_GK repetem "T" e "%"; na planilha isso confunde, então aqui vão nomes únicos */
-var HEAD_LINE=['G','A','PC','PE','Passes T','Passes %','CC','CE','Chutes T','Chutes %','DE','DO','FS','FC','I','CA','CV'];
-var HEAD_GK  =['GS','DD','PC','PE','Passes T','Passes %','RC','RE','Reposicoes T','Reposicoes %','D','F','FS','FC','AI','CA','CV'];
+var HEAD_LINE=['G','A','PC','PE','Passes T','Passes %','CC','CE','Chutes T','Chutes %','DE','DO','FS','FC','CA','CV'];
+var HEAD_GK  =['GS','D','F','CC','CE','Chutes T','Chutes %','PC','PE','Passes T','Passes %','RC','RE','Reposicoes T','Reposicoes %','FS','FC','AI','CA','CV'];
 
 function statBlock(out,title,players,cols,head){
   out.push([title,'#','Jogador'].concat(head));
@@ -1452,22 +1853,33 @@ function buildFullCsv(){
   out.push(['Data',dateBR()]);
   out.push(['Nossa equipe',S.team]);
   out.push(['Adversário',S.opp]);
-  out.push(['Tempo de jogo',fmt(now())+' ('+S.period+'º tempo)']);
+  out.push(['Tempo do 1º tempo',fmt(tempoDe(1))]);
+  out.push(['Tempo do 2º tempo',fmt(tempoDe(2))]);
+  out.push(['Tempo total',fmt(tempoTotal())]);
   out.push([]);
 
-  out.push(['RELATÓRIO',S.team||'Nós',S.opp||'Adversário']);
-  /* decimal com vírgula: é assim que o Excel/Planilhas em pt-BR lê */
-  reportRows().forEach(function(r){
-    out.push([r[0],r[1].replace('.',','),r[2].replace('.',',')]);
+  /* o mesmo conjunto sai três vezes: jogo todo, 1º tempo e 2º tempo */
+  var guarda=PERF;
+  [[0,'JOGO TODO'],[1,'1º TEMPO'],[2,'2º TEMPO']].forEach(function(o){
+    PERF=o[0];
+    out.push(['RELATÓRIO — '+o[1],S.team||'Nós',S.opp||'Adversário']);
+    /* decimal com vírgula: é assim que o Excel/Planilhas em pt-BR lê */
+    reportRows().forEach(function(r){
+      out.push([r[0],r[1].replace('.',','),r[2].replace('.',',')]);
+    });
+    out.push([]);
+    statBlock(out,'JOGADORES DE LINHA — '+o[1],
+      S.players.filter(function(p){return !p.gk;}),COLS_LINE,HEAD_LINE);
+    out.push([]);
+    statBlock(out,'GOLEIROS — '+o[1],
+      S.players.filter(function(p){return p.gk;}),COLS_GK,HEAD_GK);
+    out.push([]);
   });
-  out.push([]);
+  PERF=guarda;
 
-  statBlock(out,'JOGADORES DE LINHA',S.players.filter(function(p){return !p.gk;}),COLS_LINE,HEAD_LINE);
-  out.push([]);
-  statBlock(out,'GOLEIROS',S.players.filter(function(p){return p.gk;}),COLS_GK,HEAD_GK);
-  out.push([]);
-
-  out.push(['BOTÕES LIVRES','#','Jogador'].concat(S.freeLabels));
+  out.push(['BOTÕES LIVRES','#','Jogador'].concat(S.freeLabels.map(function(l,i){
+    return sigla(FREE[i])+' · '+l;
+  })));
   S.players.forEach(function(p){
     out.push([''].concat([p.num,p.name],FREE.map(function(c){return count(p.id,c);})));
   });
@@ -1487,12 +1899,26 @@ function buildFullCsv(){
 function buildTxt(){
   var L=[];
   L.push((S.team||'Nós')+' '+sumAll('G')+' × '+sumAll('GS')+' '+(S.opp||'Adversário'));
-  L.push(dateBR()+' · tempo de jogo '+fmt(now()));
+  L.push(dateBR()+' · 1ºT '+fmt(tempoDe(1))+' · 2ºT '+fmt(tempoDe(2))+
+         ' · total '+fmt(tempoTotal()));
   L.push('');
+  /* o resumo é sempre do jogo todo, mesmo com filtro na tela */
+  var guarda=PERF; PERF=0;
   reportRows().forEach(function(r){
     if(r[0]==='Placar') return;
     L.push(r[0]+': '+r[1]+(r[2]==='—'?'':' × '+r[2]));
   });
+  /* e o essencial de novo, tempo a tempo */
+  [[1,'1º TEMPO'],[2,'2º TEMPO']].forEach(function(o){
+    PERF=o[0];
+    L.push('');
+    L.push(o[1]+' ('+fmt(tempoDe(o[0]))+')');
+    reportRows().forEach(function(r){
+      if(['Placar','Total de chutes','Chutes a gol','Passes errados'].indexOf(r[0])<0) return;
+      L.push(r[0]+': '+r[1]+(r[2]==='—'?'':' × '+r[2]));
+    });
+  });
+  PERF=guarda;
 
   var abriu=false;
   function listBy(code,titulo){
@@ -1557,8 +1983,7 @@ $('#expCsvEv').addEventListener('click',function(){
   var rows=[['tempo','minuto','numero','jogador','codigo','descricao','x_m','y_m']];
   S.events.forEach(function(e){
     var p=e.p?player(e.p):null;
-    rows.push([e.per,fmt(e.t),p?p.num:'',p?p.name:'EQUIPE',e.c,
-      DESC[e.c]||S.freeLabels[FREE.indexOf(e.c)]||'',
+    rows.push([e.per,fmt(e.t),p?p.num:'',p?p.name:'EQUIPE',sigla(e.c),descr(e.c),
       e.x!=null?(e.x/10).toFixed(1):'', e.y!=null?(e.y/10).toFixed(1):'']);
   });
   dl(fileName('eventos','csv'),'﻿'+csv(rows));
@@ -1604,8 +2029,9 @@ $('#impFile').addEventListener('change',function(){
       var m=partidaNova(P);
       m.team=d.team||m.team; m.opp=d.opp||m.opp;
       m.players=d.players; m.events=d.events; m.shots=d.shots||[];
-      m.freeLabels=d.freeLabels||m.freeLabels; m.period=d.period||1;
-      m.clock=d.clock||m.clock;
+      m.freeLabels=d.freeLabels||m.freeLabels;
+      m.freeCodes=d.freeCodes||m.freeCodes; m.period=d.period||1;
+      m.clocks=d.clocks||null; m.clock=d.clock||null;
       S=normaliza(m); gravaJa(); boot();
       toast('Partida restaurada em '+P.nome);
       return;
@@ -1616,7 +2042,7 @@ $('#impFile').addEventListener('change',function(){
 });
 $('#resetMatch').addEventListener('click',function(){
   if(!confirm('Zerar todos os registros e o campograma desta partida? O plantel é mantido.')) return;
-  S.events=[]; S.shots=[]; S.clock={sec:0,running:false,started:0}; S.period=1;
+  S.events=[]; S.shots=[]; S.clocks={1:0,2:0}; S.run={on:false,started:0}; S.period=1;
   save(); boot(); toast('Partida zerada');
 });
 $('#undoBtn').addEventListener('click',undoLast);
@@ -1627,7 +2053,7 @@ $('#themeBtn').addEventListener('click',function(){
   var next = cur==='dark' ? 'light' : cur==='light' ? 'dark'
     : (matchMedia('(prefers-color-scheme: dark)').matches?'light':'dark');
   document.documentElement.setAttribute('data-theme',next);
-  CFG.theme=next; gravaJa(); renderPitch();
+  CFG.theme=next; gravaJa(); renderPitch(); renderCourt();
 });
 
 /* ---------- abas ---------- */
@@ -1646,7 +2072,8 @@ tabs.forEach(function(t){
 /* ---------- render ---------- */
 function renderAll(){
   renderScore(); renderRoster(); renderActions(); renderLog();
-  renderStats(); renderReport(); renderCompare(); renderPlantel();
+  renderViewSw(); renderQuadra(); renderReservas(); renderQuadraActions();
+  renderPerFiltro(); renderStats(); renderReport(); renderCompare(); renderPlantel();
   renderShotInfo(); renderLegend(); renderPerfilChip();
   if(!$('#campograma').hidden) renderPitch();
   /* a aba Partidas lê o banco; só vale o custo quando ela está à vista */
@@ -1655,9 +2082,8 @@ function renderAll(){
 function boot(){
   if(CFG.theme) document.documentElement.setAttribute('data-theme',CFG.theme);
   $('#teamName').value=S.team; $('#oppName').value=S.opp;
-  $('#periodBtn').textContent=S.period+'º T';
-  $('#clockBtn').textContent=S.clock.running?'Pausar':'Iniciar';
-  $('#clockBtn').classList.toggle('on',!!S.clock.running);
+  $('#clockBtn').textContent=S.run.on?'Pausar':'Iniciar';
+  $('#clockBtn').classList.toggle('on',!!S.run.on);
   tickClock(); renderShotModes(); renderPitch(); renderAll();
   var h=document.querySelector('header.board').offsetHeight;
   document.documentElement.style.setProperty('--tabtop',h+'px');
