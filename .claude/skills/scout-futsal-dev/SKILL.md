@@ -52,13 +52,15 @@ meio do jogo: **erro em produção custa dado de jogo perdido**, e não existe
 
 Três objetos globais dentro da IIFE:
 
-- `P` — perfil (o scout): `plantel`, `freeLabels`, `freeCodes`, `time`, `pin`.
-- `S` — partida atual: `players`, `events`, `shots`, `clocks`, `run`, `period`,
-  `view`, `freeLabels`, `freeCodes`, `sel`, `shotMode`.
+- `P` — perfil (o scout): `plantel`, `freeLabels`, `freeCodes`, `time`, `pin`,
+  `analista`, `escudo` (data URL, reduzido para 256 px).
+- `S` — partida atual: `players`, `events`, `shots`, `clocks`, `run`, `esc`,
+  `period`, `view`, `freeLabels`, `freeCodes`, `sel`, `shotMode`, `shotSide`,
+  `data`, `competicao`, `categoria`, `rodada`, `local`.
 - `CFG` — tema e ponteiros de qual perfil/partida estão abertos.
 
 Evento: `{p:<id do jogador ou null p/ equipe>, c:<código>, t:<segundos no tempo>,
-per:<1|2>, id:<único>, x?, y?}`.
+per:<1|2>, id:<único>, x?, y?, out?:<id de quem saiu, no SUB>, adv?:1}`.
 
 Regras que o modelo impõe:
 
@@ -79,6 +81,16 @@ Regras que o modelo impõe:
 5. **Cronômetro:** `S.clocks[1]`, `S.clocks[2]` acumulados, `S.run` diz qual
    corre. `now()` é o tempo do período atual. Ao reabrir, o relógio volta
    **pausado** de propósito — o tempo em que o app ficou fechado não é jogo.
+6. **Contagem passa pelo índice.** `count`/`countF`/`contaPer` leem o mapa de
+   `indice()`, montado numa passada só e derrubado em `save()` e no começo de
+   cada render. Nunca varra `S.events` na mão dentro de laço de render.
+7. **Um toque só redesenha a aba à vista.** `renderAll()` faz placar, faltas e
+   `renderAba(abaAtual())`; o resto se refaz quando a aba aparece. Antes eram
+   oito abas por toque, e no segundo tempo isso virava atraso no dedo.
+8. **Minutagem sai de `S.esc[tempo]` + eventos `SUB`.** Mexer no `SUB` (trocar
+   jogador, por exemplo) bagunça o tempo em quadra: o log não oferece isso.
+9. **Data é a do jogo** (`S.data`), nunca `new Date()`. Relatório reaberto duas
+   semanas depois tem que sair com a data certa.
 
 ## Como aplicar mudança grande no fonte
 
@@ -121,6 +133,15 @@ Regras do teste:
 - **Re-consulte o nó depois de cada clique que registra evento.** Quase todo
   handler chama `renderAll()`, que refaz o DOM — referência velha fica órfã e o
   teste falha por engano.
+- **Abra a aba antes de olhar para ela.** Cada aba só se monta quando aparece,
+  então asserção sobre relatório, estatísticas ou temporada sem clicar na aba
+  antes falha por engano.
+- Aba que lê o banco (Temporada) é assíncrona: espere mais um tique antes de
+  conferir.
+- Stub do que o jsdom não implementa: `w.scrollTo`, `w.print`,
+  `URL.createObjectURL` e o `getBoundingClientRect` da quadra (senão o toque no
+  campograma vira coordenada `NaN`). Ignore `jsdomError` com "Not implemented" —
+  é buraco do ambiente, não erro do app.
 - Cheque primeiro `erros.length === 0`: erro de script no boot invalida o resto.
 - Nome do caso em português, curto, dizendo o comportamento
   (`'2o tempo: chutes do adversario a gol = 2'`), e imprima o valor recebido
@@ -142,11 +163,16 @@ Diga isso no relatório em vez de dar por testado.
       `s`), `COLS_LINE`/`COLS_GK`, `vals()`, `HEAD_LINE`/`HEAD_GK`,
       `reportRows()`, legenda e a tabela de códigos do `README.md`? A ordem de
       `vals()` tem que casar coluna a coluna com `COLS_*` e `HEAD_*`.
-- [ ] Render novo foi ligado em `renderAll()`?
+- [ ] Render novo foi ligado no ramo certo de `renderAba()` (e a aba nova está
+      em `ABAS`)?
 - [ ] Mutação termina em `save()`?
 - [ ] Mexeu em `PERF`? Restaurou?
 - [ ] Cor nova saiu de variável de tema? Ficou legível no claro e no escuro?
 - [ ] Elemento novo que não deve sair no PDF entrou na regra `@media print`?
+- [ ] O PDF continua saindo inteiro? `imprime()` desconde relatório,
+      estatísticas e campograma, imprime e devolve o estado das abas.
+- [ ] Backup, export ou dump de partida **nunca** entra no repositório: leva PIN
+      e nome de atleta. O `.gitignore` barra todo `.json`.
 - [ ] Texto de tela em português, com a mesma voz seca do resto (sem "ops!",
       sem exclamação).
 - [ ] `README.md` continua verdadeiro?
@@ -169,7 +195,8 @@ usa → se for de plantel, copia para o perfil em `save()` → se vier de backup
 antigo, trata no `#impFile`.
 
 **Aba nova:** `<button class="tab" data-t="x">` + `<section id="x" hidden>` +
-o id na lista do handler de abas + `renderX()` em `renderAll()`.
+o id em `ABAS` + o ramo `renderX()` em `renderAba()`. Se puder aparecer durante
+o jogo, entra também em `ABAS_JOGO`.
 
 **Mudou algo que o usuário vê:** README na mesma leva do commit.
 

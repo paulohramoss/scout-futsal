@@ -9,7 +9,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Scout Futsal">
-<meta name="sf-versao" content="abb07cad">
+<meta name="sf-versao" content="102ef95f">
 <link rel="manifest" href="./manifest.webmanifest">
 <link rel="icon" href="./icons/icon-192.png">
 <link rel="apple-touch-icon" href="./icons/icon-180.png">
@@ -87,6 +87,11 @@
   .clock .per[aria-pressed="true"]{background:var(--accent);color:var(--accent-ink);
     border-color:var(--accent)}
   .clock .tot{font-family:var(--num);font-size:12.5px;color:var(--muted)}
+  .faltas{font-size:11px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;
+    white-space:nowrap;border:1px solid var(--line);background:var(--surface-2);
+    color:var(--muted);border-radius:999px;padding:5px 10px}
+  .faltas.alerta{color:var(--amarelo);border-color:var(--amarelo)}
+  .faltas.estouro{background:var(--vermelho);border-color:var(--vermelho);color:#fff}
   .chipbtn{
     border:1px solid var(--line);background:var(--surface-2);border-radius:999px;
     padding:7px 13px;font-size:13px;font-weight:600;cursor:pointer;
@@ -279,8 +284,15 @@
   /* ---------- log ---------- */
   .log{max-height:340px;overflow:auto;border:1px solid var(--line-soft);border-radius:var(--r);
     background:var(--surface)}
-  .logrow{display:grid;grid-template-columns:64px 46px 1fr auto;gap:10px;align-items:center;
-    padding:9px 12px;border-bottom:1px solid var(--line-soft);font-size:13.5px}
+  .logrow{display:grid;grid-template-columns:64px 46px minmax(0,1fr) auto auto auto;gap:8px;
+    align-items:center;padding:9px 12px;border-bottom:1px solid var(--line-soft);font-size:13.5px}
+  .logrow .quem{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .logrow select.trocar{padding:5px 7px;font-size:12px;font-weight:600;border-radius:8px;
+    max-width:132px}
+  .logrow button.apaga{border:1px solid var(--line);background:var(--surface-2);color:var(--muted);
+    border-radius:8px;width:30px;height:30px;font-size:15px;font-weight:700;cursor:pointer;
+    line-height:1}
+  .logrow button.apaga:active{transform:scale(.94)}
   .logrow:last-child{border-bottom:0}
   .logrow .tm{font-family:var(--num);color:var(--muted);font-size:12.5px}
   .logrow .cd{font-family:var(--num);font-weight:700}
@@ -342,17 +354,37 @@
     padding:6px 11px;font-size:12.5px;font-weight:600;cursor:pointer}
   .mini:active{transform:scale(.96)}
 
+  /* ---------- identificação da partida ---------- */
+  .idform{display:grid;gap:10px;grid-template-columns:repeat(auto-fill,minmax(190px,1fr))}
+  .idform label{display:flex;flex-direction:column;gap:5px;font-size:10px;letter-spacing:.14em;
+    text-transform:uppercase;color:var(--muted);font-weight:700}
+  .idform input[type=text],.idform input[type=date]{background:var(--surface);
+    border:1px solid var(--line);border-radius:9px;padding:9px 11px;font-size:14px;
+    font-weight:600;letter-spacing:0;text-transform:none}
+  .idform .escrow{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+  .idform .escrow img{width:38px;height:38px;object-fit:contain;border-radius:8px;
+    background:var(--surface-2)}
+  .idform input[type=file]{font-size:12px;font-weight:500;letter-spacing:0;text-transform:none;
+    max-width:190px}
+  .assina{margin-top:28px}
+  .assina .risco{margin-top:36px;border-top:1px solid #999;width:270px;padding-top:5px;
+    font-size:12px}
+
   /* ---------- cabeçalho de impressão ---------- */
   .printonly{display:none}
   #printHead h1{font-size:20px;margin:0 0 2px;font-weight:700}
   #printHead .sub{font-size:12.5px;color:var(--muted)}
+  #printHead .phtop{display:flex;align-items:center;gap:14px}
+  #printHead img.esc{width:56px;height:56px;object-fit:contain}
 
   /* ---------- impressão / PDF ---------- */
   @media print{
     @page{margin:12mm}
     html,body{background:#fff;color:#000}
-    header.board, nav.tabs, .bar, .roster, .toast,
-    .viewsw, .quadraview, #listaView{display:none !important}
+    header.board, nav.tabs, .bar, .roster, .toast, .segper, .modes,
+    .viewsw, .quadraview, #listaView, .idform{display:none !important}
+    #estatisticas, #campograma{break-before:page;page-break-before:always}
+    table, .rep, .pitchwrap{break-inside:avoid;page-break-inside:avoid}
     .wrap{padding:0;max-width:none}
     .printonly{display:block;margin:0 0 14px}
     .card,.rep,.tw,.pitchwrap{box-shadow:none}
@@ -382,7 +414,9 @@
       <button class="chipbtn per" id="p1Btn" aria-pressed="true" title="Cronômetro do 1º tempo">1ºT <b class="t num" id="clock1">00:00</b></button>
       <button class="chipbtn per" id="p2Btn" aria-pressed="false" title="Cronômetro do 2º tempo">2ºT <b class="t num" id="clock2">00:00</b></button>
       <span class="tot" id="clockTot">Σ 00:00</span>
+      <span class="faltas" id="faltasChip" title="Faltas acumuladas no tempo"></span>
       <button class="chipbtn" id="clockBtn">Iniciar</button>
+      <button class="chipbtn" id="modoBtn" title="Esconder as abas de análise durante o jogo">Modo análise</button>
     </div>
   </div>
 </header>
@@ -394,6 +428,7 @@
     <button class="tab" role="tab" data-t="estatisticas" aria-selected="false">Estatísticas</button>
     <button class="tab" role="tab" data-t="relatorio" aria-selected="false">Relatório</button>
     <button class="tab" role="tab" data-t="comparacao" aria-selected="false">Comparação</button>
+    <button class="tab" role="tab" data-t="temporada" aria-selected="false">Temporada</button>
     <button class="tab" role="tab" data-t="partidas" aria-selected="false">Partidas</button>
     <button class="tab" role="tab" data-t="plantel" aria-selected="false">Plantel</button>
     <button class="tab" role="tab" data-t="dados" aria-selected="false">Dados</button>
@@ -440,16 +475,23 @@
 
   <!-- ============ CAMPOGRAMA ============ -->
   <section id="campograma" hidden>
-    <p class="hint" style="margin:16px 0 0">Escolha o tipo de finalização e toque na quadra onde ela aconteceu. O registro entra na conta do jogador selecionado no Registro.</p>
+    <p class="hint" style="margin:16px 0 0">Escolha de quem é a finalização, o tipo, e toque na
+    quadra onde ela aconteceu. As nossas entram na conta do jogador selecionado no Registro; as do
+    adversário, na conta do goleiro que está em quadra.</p>
+    <div class="segper" id="shotSide" role="group" aria-label="De quem é a finalização"></div>
     <div class="modes" id="shotModes"></div>
     <div class="pitchwrap">
       <svg class="pitch" id="pitch" viewBox="0 0 400 200" aria-label="Quadra de futsal"></svg>
     </div>
     <div class="bar">
       <button class="btn" id="undoShot">↩ Desfazer finalização</button>
+      <button class="btn" id="zonaBtn" aria-pressed="true">Zonas</button>
       <button class="btn" id="clearShots">Limpar campograma</button>
       <span class="hint" id="shotInfo"></span>
     </div>
+    <p class="hint" style="margin:0">As zonas dividem a quadra em três faixas — defesa, meio e
+    ataque, da esquerda para a direita — e dois corredores. Em cada uma: gols ÷ finalizações do
+    lado escolhido ali em cima.</p>
   </section>
 
   <!-- ============ ESTATÍSTICAS ============ -->
@@ -466,6 +508,25 @@
   <!-- ============ RELATÓRIO ============ -->
   <section id="relatorio" hidden>
     <div class="printonly" id="printHead"></div>
+
+    <h2 class="sec">Identificação</h2>
+    <div class="idform" id="idForm">
+      <label>Data do jogo<input type="date" id="fData"></label>
+      <label>Competição<input type="text" id="fComp" placeholder="Liga Catarinense"></label>
+      <label>Categoria<input type="text" id="fCat" placeholder="Sub-16"></label>
+      <label>Rodada<input type="text" id="fRod" placeholder="5ª rodada"></label>
+      <label>Local<input type="text" id="fLocal" placeholder="Ginásio Guarani"></label>
+      <label>Analista<input type="text" id="fAnalista" placeholder="Quem marcou o jogo"></label>
+      <label class="esc">Escudo do time
+        <span class="escrow">
+          <img id="escPrev" alt="" hidden>
+          <input type="file" id="fEscudo" accept="image/*">
+          <button type="button" class="mini" id="delEscudo">remover</button>
+        </span>
+      </label>
+    </div>
+    <p class="hint" style="margin:-2px 0 0">Sai no cabeçalho do PDF, no CSV e no
+    resumo em texto. O escudo fica guardado no perfil, dentro do próprio aparelho.</p>
 
     <div class="segper" id="segRep" role="group" aria-label="Filtrar por tempo"></div>
     <h2 class="sec">Relatório da partida</h2>
@@ -485,6 +546,8 @@
 
     <h2 class="sec">Botões livres</h2>
     <div class="tw"><table id="tblFree"></table></div>
+
+    <div class="printonly assina" id="printFoot"></div>
   </section>
 
   <!-- ============ COMPARAÇÃO ============ -->
@@ -494,6 +557,15 @@
       <select id="cmpA"></select><span class="hint">×</span><select id="cmpB"></select>
     </div>
     <div class="cmp" id="cmpBox"></div>
+  </section>
+
+  <!-- ============ TEMPORADA ============ -->
+  <section id="temporada" hidden>
+    <h2 class="sec">A temporada deste scout</h2>
+    <div class="atual" id="tempResumo"></div>
+    <h2 class="sec">Por atleta, somando as partidas</h2>
+    <div class="tw"><table id="tblTemp"></table></div>
+    <p class="hint" id="tempInfo" style="margin:10px 0 0"></p>
   </section>
 
   <!-- ============ PARTIDAS ============ -->
@@ -654,6 +726,8 @@ var DESC={};
 LINE.concat(GK,TEAM).forEach(function(a){DESC[a.c]=a.d;});
 /* código que saiu do app mas ainda aparece em partida antiga */
 DESC.I='Impedimento (antigo)';
+/* substituição é evento, não estatística: nenhuma tabela conta SUB */
+DESC.SUB='Substituição';
 
 /* Botão livre: por dentro o código é sempre L1..L5 — é o que fica gravado no
    evento. O scout escolhe a sigla que aparece na tela e a descrição dela. */
@@ -667,11 +741,24 @@ function descr(c){
   return (S&&S.freeLabels&&S.freeLabels[i])||('Livre '+(i+1));
 }
 
-var SHOTS=[
+/* O campograma tem dois lados: as nossas finalizações e as do adversário.
+   A do adversário entra na conta do goleiro que está em quadra — é o mesmo
+   registro do painel dele, só que com o lugar do chute junto. */
+var SHOTS_NOS=[
   {m:'G', label:'Gol',       color:'var(--gol)'},
   {m:'CC',label:'No gol',    color:'var(--accent)'},
   {m:'CE',label:'Pra fora',  color:'var(--neg)'}
 ];
+var SHOTS_ADV=[
+  {m:'GS',label:'Gol sofrido', color:'var(--gol)'},
+  {m:'D', label:'Defesa',      color:'var(--accent)'},
+  {m:'F', label:'Pra fora',    color:'var(--neg)'}
+];
+function shotSet(){ return (S&&S.shotSide==='adv') ? SHOTS_ADV : SHOTS_NOS; }
+function shotCor(m){
+  var t=SHOTS_NOS.concat(SHOTS_ADV).filter(function(x){return x.m===m;})[0];
+  return t?t.color:'var(--neg)';
+}
 
 /* ---------- banco local ---------- */
 /* Banco de verdade, dentro do navegador: IndexedDB. Nada sai do aparelho.
@@ -790,7 +877,7 @@ var banco=(function(){
 /* ---------- estado ---------- */
 var VELHO='futsal-scouting-v1';   /* onde a versão anterior guardava tudo */
 var P=null;                        /* perfil atual: quem está marcando */
-var CFG={theme:null};
+var CFG={theme:null,modo:'analise'};
 var S=null;                        /* partida atual — mesmo formato de sempre */
 
 function uid(pre){ return (pre||'')+Date.now().toString(36)+Math.random().toString(36).slice(2,7); }
@@ -834,13 +921,15 @@ function partidaNova(perfil){
   return {
     id:uid('m'), perfil:perfil?perfil.id:null,
     criada:Date.now(), atualizada:Date.now(),
+    data:dataISOde(Date.now()),
+    competicao:'', categoria:'', rodada:'', local:'',
     team:perfil?perfil.time:'Minha equipe', opp:'Adversário',
     players:ps, events:[], shots:[],
     freeLabels:perfil?copia(perfil.freeLabels):labelsPadrao(),
     freeCodes:(perfil&&perfil.freeCodes)?copia(perfil.freeCodes):codigosPadrao(),
     /* um cronômetro por tempo; run diz qual deles está andando agora */
-    clocks:{1:0,2:0}, run:{on:false,started:0}, period:1, view:'quadra',
-    sel:(ps[0]||{}).id, shotMode:'G'
+    clocks:{1:0,2:0}, run:{on:false,started:0}, esc:{}, period:1, view:'quadra',
+    sel:(ps[0]||{}).id, shotMode:'G', shotSide:'nos'
   };
 }
 /* partida vinda do banco pode ser antiga; completa o que falta */
@@ -854,10 +943,19 @@ function normaliza(m){
   if(m.view!=='lista') m.view='quadra';
   montaQuadra(m.players);
   if(!m.criada) m.criada=Date.now();
+  /* a data do relatório é a do jogo, não a de hoje: scout digita jogo de
+     ontem, reabre partida de duas semanas atrás para imprimir */
+  if(!m.data) m.data=dataISOde(m.criada);
+  if(m.competicao==null) m.competicao='';
+  if(m.categoria==null) m.categoria='';
+  if(m.rodada==null) m.rodada='';
+  if(m.local==null) m.local='';
   if(!m.sel||!m.players.some(function(p){return p.id===m.sel;})) m.sel=(m.players[0]||{}).id;
   if(!m.shotMode) m.shotMode='G';
+  if(m.shotSide!=='adv') m.shotSide='nos';
   /* dois cronômetros, um por tempo. Partida antiga tinha um só: o que estava
      nele entra no tempo em que a partida parou. */
+  if(!m.esc) m.esc={};
   if(!m.clocks){
     m.clocks={1:0,2:0};
     m.clocks[m.period]=(m.clock&&m.clock.sec)||0;
@@ -876,6 +974,7 @@ function normaliza(m){
 var aguardaSave=0;
 function save(){
   if(!S) return;
+  zeraIndice();
   S.atualizada=Date.now();
   /* o plantel e os botões livres da partida viram o padrão do perfil,
      para a próxima partida já nascer com o time certo */
@@ -888,7 +987,8 @@ function gravaJa(){
   clearTimeout(aguardaSave);
   if(S) banco.grava('partidas',S);
   if(P) banco.grava('perfis',P);
-  banco.grava('app',{k:'cfg', perfil:P?P.id:null, partida:S?S.id:null, theme:CFG.theme});
+  banco.grava('app',{k:'cfg', perfil:P?P.id:null, partida:S?S.id:null,
+                     theme:CFG.theme, modo:CFG.modo});
 }
 window.addEventListener('pagehide',gravaJa);
 document.addEventListener('visibilitychange',function(){ if(document.hidden) gravaJa(); });
@@ -915,6 +1015,7 @@ function iniciar(){
   }).then(function(r){
     var cfg=r[0]||{}, perfis=r[1]||[];
     CFG.theme=cfg.theme||null;
+    CFG.modo=cfg.modo||'analise';
 
     if(!perfis.length){
       var velho=leVelho();
@@ -967,16 +1068,28 @@ function now(){ return tempoDe(S.period); }
 function toast(msg){var t=$('#toast');t.textContent=msg;t.classList.add('on');
   clearTimeout(toast._i);toast._i=setTimeout(function(){t.classList.remove('on');},1600);}
 
-function count(pid,code){
-  var n=0,e;
-  for(var i=0;i<S.events.length;i++){e=S.events[i];if(e.p===pid&&e.c===code)n++;}
-  return n;
+/* Índice de contagem: uma passada nos eventos por render, no lugar de uma
+   passada por botão. Com plantel cheio e o jogo adiantado, cada toque varria a
+   lista de eventos centenas de vezes — e toque com atraso na beira da quadra é
+   ação perdida. Cai a cada gravação e se refaz sozinho no próximo count. */
+var idxCont=null;
+function zeraIndice(){ idxCont=null; }
+function indice(){
+  if(idxCont) return idxCont;
+  var m={}, i, e, k;
+  for(i=0;i<S.events.length;i++){
+    e=S.events[i];
+    k=(e.p||'EQ')+'|'+e.c;
+    m[k]=(m[k]||0)+1;
+    k=k+'|'+e.per;
+    m[k]=(m[k]||0)+1;
+  }
+  idxCont=m;
+  return m;
 }
-function teamCount(code){
-  var n=0;
-  for(var i=0;i<S.events.length;i++) if(S.events[i].p===null&&S.events[i].c===code) n++;
-  return n;
-}
+function count(pid,code){ return indice()[(pid||'EQ')+'|'+code]||0; }
+function contaPer(pid,code,per){ return indice()[(pid||'EQ')+'|'+code+'|'+per]||0; }
+function teamCount(code){ return count(null,code); }
 function sumAll(code,gk){
   var n=0;
   for(var i=0;i<S.players.length;i++){
@@ -995,21 +1108,9 @@ var PERF=0;
 function noFiltro(e){ return !PERF || e.per===PERF; }
 function rotuloFiltro(){ return PERF? PERF+'º tempo' : 'jogo todo'; }
 function countF(pid,code){
-  var n=0,e;
-  for(var i=0;i<S.events.length;i++){
-    e=S.events[i];
-    if(e.p===pid&&e.c===code&&noFiltro(e))n++;
-  }
-  return n;
+  return PERF ? contaPer(pid,code,PERF) : count(pid,code);
 }
-function teamCountF(code){
-  var n=0,e;
-  for(var i=0;i<S.events.length;i++){
-    e=S.events[i];
-    if(e.p===null&&e.c===code&&noFiltro(e))n++;
-  }
-  return n;
-}
+function teamCountF(code){ return countF(null,code); }
 function sumAllF(code,gk){
   var n=0;
   for(var i=0;i<S.players.length;i++){
@@ -1020,12 +1121,101 @@ function sumAllF(code,gk){
   return n;
 }
 
+/* ---------- minutagem ----------
+   Quem começou cada tempo fica gravado quando o cronômetro daquele tempo parte;
+   dali para frente quem manda são os eventos SUB. Com os dois, sai o tempo em
+   quadra de cada atleta — e é isso que separa o pivô que fez 3 gols em 30
+   minutos do que fez 3 em 8. */
+function marcaEscalacao(){
+  if(!S.esc) S.esc={};
+  if(S.esc[S.period]) return;
+  S.esc[S.period]=S.players.filter(function(p){return p.court;})
+                           .map(function(p){return p.id;});
+}
+/* tempo que começou antes desta versão não tem escalação gravada: desfaz as
+   substituições de trás para frente até chegar em quem começou */
+function escalacaoDe(per){
+  if(S.esc&&S.esc[per]) return S.esc[per];
+  var ids={}, i, e, subs=[];
+  S.players.forEach(function(p){ if(p.court) ids[p.id]=1; });
+  for(i=0;i<S.events.length;i++) if(S.events[i].c==='SUB'&&S.events[i].per>=per) subs.push(S.events[i]);
+  for(i=subs.length-1;i>=0;i--){
+    e=subs[i];
+    delete ids[e.p];
+    if(e.out) ids[e.out]=1;
+  }
+  return Object.keys(ids);
+}
+function subsDoTempo(per){
+  var a=[],i;
+  for(i=0;i<S.events.length;i++) if(S.events[i].c==='SUB'&&S.events[i].per===per) a.push(S.events[i]);
+  return a.sort(function(x,y){return x.t-y.t;});
+}
+/* segundos em quadra; respeita o filtro de tempo do relatório */
+function minutosDe(pid){
+  var pers = PERF?[PERF]:[1,2], tot=0;
+  pers.forEach(function(per){
+    var fim=tempoDe(per);
+    if(fim<=0) return;
+    var dentro=escalacaoDe(per).indexOf(pid)>=0, desde=0, subs=subsDoTempo(per), i, e;
+    for(i=0;i<subs.length;i++){
+      e=subs[i];
+      if(e.out===pid && dentro){ tot+=Math.max(0,e.t-desde); dentro=false; }
+      if(e.p===pid && !dentro){ dentro=true; desde=e.t; }
+    }
+    if(dentro) tot+=Math.max(0,fim-desde);
+  });
+  return tot;
+}
+function acoesDe(pid){
+  var n=0,i,e;
+  for(i=0;i<S.events.length;i++){
+    e=S.events[i];
+    if(e.p===pid&&e.c!=='SUB'&&noFiltro(e)) n++;
+  }
+  return n;
+}
+/* [minutos em quadra, ações por minuto] */
+function extrasDe(p){
+  var seg=minutosDe(p.id), a=acoesDe(p.id);
+  return [seg, seg>0 ? a*60/seg : 0];
+}
+
 /* ---------- registrar / desfazer ---------- */
 function log(pid,code,extra){
   var ev={p:pid,c:code,t:Math.round(now()),per:S.period,id:Date.now()+Math.random()};
-  if(extra){ev.x=extra.x;ev.y=extra.y;}
-  S.events.push(ev); save(); renderAll(); return ev;
+  if(extra){
+    if(extra.x!=null){ ev.x=extra.x; ev.y=extra.y; }
+    if(extra.out) ev.out=extra.out;   /* quem saiu, na substituição */
+    if(extra.adv) ev.adv=1;           /* finalização do adversário */
+  }
+  S.events.push(ev); save();
+  if(code==='FC') avisaFalta();
+  renderAll();
+  return ev;
 }
+function nomeCurto(pid){
+  var p=player(pid);
+  return p ? (p.num+' '+p.name) : '—';
+}
+/* apagar leva junto o ponto do campograma amarrado ao evento */
+function apagaEvento(id){
+  var i;
+  for(i=S.events.length-1;i>=0;i--) if(S.events[i].id===id){ S.events.splice(i,1); break; }
+  for(i=S.shots.length-1;i>=0;i--) if(S.shots[i].ev===id){ S.shots.splice(i,1); break; }
+  save(); renderAll(); toast('Registro apagado');
+}
+function trocaJogadorDoEvento(id,novo){
+  var e=null,i;
+  for(i=0;i<S.events.length;i++) if(S.events[i].id===id){ e=S.events[i]; break; }
+  if(!e) return;
+  e.p=novo;
+  var p=player(novo);
+  if(p) for(i=0;i<S.shots.length;i++) if(S.shots[i].ev===id) S.shots[i].num=p.num;
+  save(); renderAll();
+  toast('Registro passou para '+(p?p.name:'—'));
+}
+
 function undoLast(){
   if(!S.events.length){toast('Nada para desfazer');return;}
   var e=S.events.pop();
@@ -1051,23 +1241,45 @@ setInterval(function(){
   if(++tiques>=10){ tiques=0; S.clocks[S.period]=now(); S.run.started=Date.now(); save(); }
 },500);
 
+/* Wake Lock: com o cronômetro andando a tela não apaga sozinha. iPad apagando
+   no meio do segundo tempo custa as ações que acontecem até destravar. */
+var travaW=null;
+function travaTela(){
+  if(!navigator.wakeLock || travaW) return;
+  navigator.wakeLock.request('screen').then(function(t){
+    travaW=t;
+    t.addEventListener('release',function(){ travaW=null; });
+  }).catch(function(){});
+}
+function soltaTela(){
+  if(!travaW) return;
+  try{ travaW.release(); }catch(e){}
+  travaW=null;
+}
+/* o sistema solta a trava sozinho quando o app sai de vista; pega de volta */
+document.addEventListener('visibilitychange',function(){
+  if(!document.hidden && S && S.run && S.run.on) travaTela();
+});
+
 function paraRelogio(){
   if(!S.run.on) return;
   S.clocks[S.period]=now(); S.run.on=false;
   $('#clockBtn').textContent='Iniciar';
   $('#clockBtn').classList.remove('on');
+  soltaTela();
 }
 $('#clockBtn').addEventListener('click',function(){
   if(S.run.on){ paraRelogio(); }
   else { S.run.started=Date.now(); S.run.on=true;
-         this.textContent='Pausar'; this.classList.add('on'); }
+         this.textContent='Pausar'; this.classList.add('on'); travaTela();
+         marcaEscalacao(); }
   save(); tickClock();
 });
 /* trocar de tempo sempre para o relógio: o que roda é o do tempo escolhido */
 function trocaTempo(per){
   if(S.period===per) return;
   paraRelogio();
-  S.period=per; save(); tickClock();
+  S.period=per; save(); tickClock(); renderFaltas();
   toast(per+'º tempo — toque em Iniciar');
 }
 $('#p1Btn').addEventListener('click',function(){trocaTempo(1);});
@@ -1076,6 +1288,30 @@ $('#p2Btn').addEventListener('click',function(){trocaTempo(2);});
 /* ---------- placar / nomes ---------- */
 $('#teamName').addEventListener('input',function(){S.team=this.value;save();});
 $('#oppName').addEventListener('input',function(){S.opp=this.value;save();});
+
+/* Faltas acumuladas do tempo. A quinta é tiro livre de 10 m sem barreira: é a
+   informação que o banco pede gritando, e o placar não mostrava. */
+function faltasNossas(per){
+  var n=0,i;
+  for(i=0;i<S.players.length;i++) n+=contaPer(S.players[i].id,'FC',per);
+  return n;
+}
+function faltasDeles(per){
+  var n=0,i;
+  for(i=0;i<S.players.length;i++) n+=contaPer(S.players[i].id,'FS',per);
+  return n;
+}
+function renderFaltas(){
+  var nos=faltasNossas(S.period), eles=faltasDeles(S.period);
+  var c=$('#faltasChip');
+  c.textContent='Faltas '+S.period+'ºT · nós '+nos+'/5 · eles '+eles+'/5';
+  c.className='faltas'+(nos>=5?' estouro':(nos>=4?' alerta':''));
+}
+function avisaFalta(){
+  var n=faltasNossas(S.period);
+  if(n===4) toast('4ª falta do time no '+S.period+'º tempo');
+  else if(n>=5) toast(n+'ª falta — tiro livre de 10 m, sem barreira');
+}
 
 function renderScore(){
   $('#scoreUs').textContent=sumAll('G');
@@ -1227,7 +1463,8 @@ function renderReservas(){
 function entraEmQuadra(p){
   if(slotVago!=null){
     p.court=true; p.slot=slotVago; slotVago=null;
-    S.sel=p.id; save(); renderAll();
+    S.sel=p.id;
+    log(p.id,'SUB',{});
     toast('Entra '+p.num+' '+p.name);
     return;
   }
@@ -1235,7 +1472,9 @@ function entraEmQuadra(p){
   if(!sai||!sai.court){ toast('Toque primeiro em quem sai da quadra'); return; }
   p.court=true; p.slot=sai.slot;
   sai.court=false; sai.slot=null;
-  S.sel=p.id; save(); renderAll();
+  S.sel=p.id;
+  /* a troca vira evento: é dela que sai a minutagem de cada atleta */
+  log(p.id,'SUB',{out:sai.id});
   toast('Entra '+p.num+' '+p.name+' · sai '+sai.num+' '+sai.name);
 }
 $('#resBar').addEventListener('click',function(){ resAberto=!resAberto; renderReservas(); });
@@ -1293,8 +1532,29 @@ function renderLog(){
     r.appendChild(el('span','tm',e.per+'T '+fmt(e.t)));
     r.appendChild(el('span','cd',sigla(e.c)));
     var nm = e.p ? ((player(e.p)||{num:'?',name:'—'}).num+' · '+(player(e.p)||{name:'—'}).name) : 'Equipe';
-    r.appendChild(el('span','',nm));
-    r.appendChild(el('span','hint',descr(e.c)));
+    r.appendChild(el('span','quem',nm));
+    r.appendChild(el('span','hint',
+      e.c==='SUB' ? ('entra '+nomeCurto(e.p)+(e.out?' · sai '+nomeCurto(e.out):'')) : descr(e.c)));
+    /* errou o jogador e só viu quatro ações depois: aqui troca sem desfazer o
+       resto. Substituição fica de fora — mexer nela bagunçaria a minutagem. */
+    if(e.p && e.c!=='SUB'){
+      var sel=el('select','trocar');
+      S.players.forEach(function(p){
+        var o=el('option',null,p.num+' · '+p.name);
+        o.value=p.id; sel.appendChild(o);
+      });
+      sel.value=e.p;
+      sel.setAttribute('aria-label','Trocar o jogador deste registro');
+      sel.addEventListener('change',function(){ trocaJogadorDoEvento(e.id,this.value); });
+      r.appendChild(sel);
+    }else{
+      r.appendChild(el('span'));
+    }
+    var x=el('button','apaga','×'); x.type='button';
+    x.title='Apagar este registro';
+    x.setAttribute('aria-label','Apagar este registro');
+    x.addEventListener('click',function(){ apagaEvento(e.id); });
+    r.appendChild(x);
     box.appendChild(r);
   });
   var last=S.events[S.events.length-1];
@@ -1305,9 +1565,23 @@ function renderLog(){
 }
 
 /* ---------- campograma ---------- */
+function renderShotSide(){
+  var box=$('#shotSide'); box.textContent='';
+  [['nos','Nossas finalizações'],['adv','Do adversário']].forEach(function(o){
+    var b=el('button',null,o[1]); b.type='button';
+    b.setAttribute('aria-pressed',String(S.shotSide===o[0]));
+    b.addEventListener('click',function(){
+      S.shotSide=o[0];
+      /* o tipo muda junto com o lado: gol sofrido não existe do nosso lado */
+      S.shotMode=shotSet()[0].m;
+      save(); renderShotSide(); renderShotModes(); renderPitch(); renderShotInfo();
+    });
+    box.appendChild(b);
+  });
+}
 function renderShotModes(){
   var box=$('#shotModes'); box.textContent='';
-  SHOTS.forEach(function(s){
+  shotSet().forEach(function(s){
     var b=el('button','mode'); b.type='button';
     b.setAttribute('aria-pressed',String(S.shotMode===s.m));
     var d=el('span','dot'); d.style.background=s.color;
@@ -1316,6 +1590,29 @@ function renderShotModes(){
     box.appendChild(b);
   });
 }
+/* Seis zonas: três faixas no comprimento (defesa, meio, ataque, da esquerda
+   para a direita) e dois corredores. Mesmo dado dos pontinhos, lido de um jeito
+   que serve para conversar com o time. */
+var zonasOn=true;
+var ZONA_TAG=['DEF','MEI','ATA','DEF','MEI','ATA'];
+function zonaDe(x,y){
+  var c=Math.floor((x-10)/126.667), l=Math.floor((y-10)/90);
+  if(c<0)c=0; if(c>2)c=2;
+  if(l<0)l=0; if(l>1)l=1;
+  return l*3+c;
+}
+function statsZonas(adv){
+  var z=[],i;
+  for(i=0;i<6;i++) z.push({t:0,g:0});
+  S.shots.forEach(function(sh){
+    if(!!sh.adv !== !!adv) return;
+    var k=zonaDe(sh.x,sh.y);
+    z[k].t++;
+    if(sh.m==='G'||sh.m==='GS') z[k].g++;
+  });
+  return z;
+}
+
 var NS='http://www.w3.org/2000/svg';
 function sv(t,attrs){var e=document.createElementNS(NS,t);for(var k in attrs)e.setAttribute(k,attrs[k]);return e;}
 
@@ -1341,11 +1638,39 @@ function renderPitch(){
   add('rect',{x:4,y:85,width:6,height:30});
   add('rect',{x:390,y:85,width:6,height:30});
 
+  // zonas, por baixo dos marcadores
+  if(zonasOn){
+    var adv=S.shotSide==='adv', zs=statsZonas(adv), maxZ=1, iz;
+    for(iz=0;iz<6;iz++) if(zs[iz].t>maxZ) maxZ=zs[iz].t;
+    var acc=getComputedStyle(document.documentElement).getPropertyValue('--accent').trim();
+    for(iz=0;iz<6;iz++){
+      var zc=iz%3, zl=Math.floor(iz/3);
+      var zx=10+126.667*zc, zy=10+90*zl, zt=zs[iz];
+      p.appendChild(sv('rect',{x:zx,y:zy,width:126.667,height:90,fill:acc,
+        'fill-opacity':(zt.t?0.06+0.26*(zt.t/maxZ):0.02),
+        stroke:line,'stroke-width':0.6,'stroke-dasharray':'3 3'}));
+      var rot=sv('text',{x:zx+63,y:zy+40,'text-anchor':'middle','font-size':9,
+        fill:'currentColor','fill-opacity':.55,'font-family':'ui-monospace,monospace'});
+      rot.textContent=ZONA_TAG[iz];
+      p.appendChild(rot);
+      var num=sv('text',{x:zx+63,y:zy+56,'text-anchor':'middle','font-size':11,
+        fill:'currentColor','fill-opacity':.8,'font-family':'ui-monospace,monospace'});
+      num.textContent = zt.t ? (zt.g+'/'+zt.t+' · '+Math.round(zt.g*100/zt.t)+'%') : '—';
+      p.appendChild(num);
+    }
+  }
+
   // marcadores
   S.shots.forEach(function(s){
-    var col=(SHOTS.filter(function(x){return x.m===s.m;})[0]||SHOTS[1]).color;
+    var col=shotCor(s.m);
     var g=sv('g',{});
-    if(s.m==='G'){
+    if(s.adv){
+      /* adversário em quadrado, para separar do nosso ponto num olhar só */
+      var lado = (s.m==='GS') ? 12 : 10;
+      g.appendChild(sv('rect',{x:s.x-lado/2,y:s.y-lado/2,width:lado,height:lado,rx:2,
+        fill:(s.m==='F'?'none':col),'fill-opacity':(s.m==='GS'?1:.8),
+        stroke:col,'stroke-width':(s.m==='F'?2:1.4)}));
+    }else if(s.m==='G'){
       g.appendChild(sv('circle',{cx:s.x,cy:s.y,r:6.5,fill:col,stroke:'#fff','stroke-width':1.6}));
     }else if(s.m==='CC'){
       g.appendChild(sv('circle',{cx:s.x,cy:s.y,r:5.5,fill:col,'fill-opacity':.85}));
@@ -1359,23 +1684,47 @@ function renderPitch(){
   });
 
   p.onclick=function(ev){
-    var pl=player(S.sel);
-    if(!pl){toast('Selecione um jogador na aba Registro');return;}
     var r=p.getBoundingClientRect();
     var x=(ev.clientX-r.left)/r.width*400, y=(ev.clientY-r.top)/r.height*200;
-    var e=log(pl.id,S.shotMode,{x:x,y:y});
-    S.shots.push({x:x,y:y,m:S.shotMode,num:pl.num,ev:e.id});
+    var alvo, e;
+    if(S.shotSide==='adv'){
+      alvo=goleiroEmQuadra();
+      if(!alvo){ toast('Ponha um goleiro em quadra: a finalização deles entra na conta dele'); return; }
+      e=log(alvo.id,S.shotMode,{x:x,y:y,adv:1});
+      S.shots.push({x:x,y:y,m:S.shotMode,num:alvo.num,ev:e.id,adv:1});
+    }else{
+      alvo=player(S.sel);
+      if(!alvo){toast('Selecione um jogador na aba Registro');return;}
+      e=log(alvo.id,S.shotMode,{x:x,y:y});
+      S.shots.push({x:x,y:y,m:S.shotMode,num:alvo.num,ev:e.id});
+    }
     save(); renderPitch(); renderShotInfo();
   };
 }
-function renderShotInfo(){
-  var g=S.shots.filter(function(s){return s.m==='G';}).length;
-  var cc=S.shots.filter(function(s){return s.m==='CC';}).length;
-  var ce=S.shots.filter(function(s){return s.m==='CE';}).length;
-  $('#shotInfo').textContent=S.shots.length
-    ? (S.shots.length+(S.shots.length===1?' finalização':' finalizações')+' · '+g+' gol, '+cc+' no gol, '+ce+' fora')
-    : '';
+function goleiroEmQuadra(){
+  var i;
+  for(i=0;i<S.players.length;i++) if(S.players[i].court&&S.players[i].gk) return S.players[i];
+  for(i=0;i<S.players.length;i++) if(S.players[i].court&&S.players[i].slot===0) return S.players[i];
+  return null;
 }
+function contaMarca(m,adv){
+  return S.shots.filter(function(s){ return s.m===m && !!s.adv===!!adv; }).length;
+}
+function renderShotInfo(){
+  var nos=S.shots.filter(function(s){return !s.adv;}).length;
+  var adv=S.shots.length-nos;
+  var l=[];
+  if(nos) l.push('Nós: '+nos+' · '+contaMarca('G')+' gol, '+contaMarca('CC')+' no gol, '+
+                 contaMarca('CE')+' fora');
+  if(adv) l.push('Eles: '+adv+' · '+contaMarca('GS',1)+' gol, '+contaMarca('D',1)+' defendido, '+
+                 contaMarca('F',1)+' fora');
+  $('#shotInfo').textContent=l.join('  |  ');
+}
+$('#zonaBtn').addEventListener('click',function(){
+  zonasOn=!zonasOn;
+  this.setAttribute('aria-pressed',String(zonasOn));
+  renderPitch();
+});
 $('#undoShot').addEventListener('click',function(){
   if(!S.shots.length){toast('Campograma vazio');return;}
   var s=S.shots.pop();
@@ -1420,16 +1769,23 @@ function buildTable(tbl,cols,players){
   tr.appendChild(el('th','l','#'));
   tr.appendChild(el('th','l','Jogador'));
   cols.forEach(function(c){tr.appendChild(el('th','num',c));});
+  /* minutos em quadra e ações por minuto: num esporte de rodízio, 3 gols em 8
+     minutos e 3 gols em 30 não são a mesma linha */
+  tr.appendChild(el('th','num','MIN'));
+  tr.appendChild(el('th','num','A/M'));
   thead.appendChild(tr); tbl.appendChild(thead);
-  var tb=el('tbody');
+  var tb=el('tbody'), somaSeg=0;
   players.forEach(function(p){
-    var r=el('tr'), v=rowVals(p);
+    var r=el('tr'), v=rowVals(p), ex=extrasDe(p);
+    somaSeg+=ex[0];
     r.appendChild(el('td','l num',String(p.num)));
     r.appendChild(el('td','l',p.name));
     v.forEach(function(x,i){
       var isPct=cols[i]==='%';
       r.appendChild(el('td','num'+(x?'':' z'), isPct? (x?x.toFixed(1)+'%':'—') : String(x)));
     });
+    r.appendChild(el('td','num'+(ex[0]?'':' z'), ex[0]?fmt(ex[0]):'—'));
+    r.appendChild(el('td','num'+(ex[1]?'':' z'), ex[1]?ex[1].toFixed(1):'—'));
     tb.appendChild(r);
   });
   var tr2=el('tr','tot'), tv=groupVals(players);
@@ -1439,6 +1795,8 @@ function buildTable(tbl,cols,players){
     var isPct=cols[i]==='%';
     tr2.appendChild(el('td','num', isPct? (x?x.toFixed(1)+'%':'—') : String(x)));
   });
+  tr2.appendChild(el('td','num',somaSeg?fmt(somaSeg):'—'));
+  tr2.appendChild(el('td','num','—'));
   tb.appendChild(tr2);
   tbl.appendChild(tb);
 }
@@ -1511,12 +1869,25 @@ function renderReport(){
 
   reportRows().forEach(function(r){ box.appendChild(repRow(r[1],r[0],r[2])); });
 
-  /* cabeçalho que só sai na impressão / PDF */
+  /* cabeçalho e rodapé que só saem na impressão / PDF */
   var ph=$('#printHead'); ph.textContent='';
-  var h1=el('h1',null,(S.team||'Nós')+'  '+sumAll('G')+' × '+sumAll('GS')+'  '+(S.opp||'Adversário'));
-  ph.appendChild(h1);
-  ph.appendChild(el('div','sub','Relatório da partida · '+dateBR()+' · '+rotuloFiltro()+
+  var topo=el('div','phtop');
+  if(P&&P.escudo){
+    var im=document.createElement('img');
+    im.className='esc'; im.src=P.escudo; im.alt='';
+    topo.appendChild(im);
+  }
+  var tit=el('div');
+  tit.appendChild(el('h1',null,(S.team||'Nós')+'  '+sumAll('G')+' × '+sumAll('GS')+'  '+(S.opp||'Adversário')));
+  tit.appendChild(el('div','sub',identLinha()));
+  tit.appendChild(el('div','sub','Relatório · '+rotuloFiltro()+
     ' · 1ºT '+fmt(tempoDe(1))+' · 2ºT '+fmt(tempoDe(2))+' · '+S.events.length+' registros'));
+  topo.appendChild(tit);
+  ph.appendChild(topo);
+
+  var pf=$('#printFoot'); pf.textContent='';
+  pf.appendChild(el('div','risco','Analista'+((P&&P.analista)?': '+P.analista:'')));
+  preencheIdent();
 
   var t=$('#tblFree'); t.textContent='';
   var thead=el('thead'),tr=el('tr');
@@ -1532,6 +1903,157 @@ function renderReport(){
     tb.appendChild(r);
   });
   t.appendChild(tb);
+}
+
+/* ---------- identificação da partida ---------- */
+/* competição, categoria, rodada e local só aparecem quando o scout preenche —
+   relatório com campo vazio parece formulário abandonado */
+function identLinha(){
+  var l=[dateBR()];
+  if(S.competicao) l.push(S.competicao);
+  if(S.categoria)  l.push(S.categoria);
+  if(S.rodada)     l.push(S.rodada);
+  if(S.local)      l.push(S.local);
+  return l.join(' · ');
+}
+var IDENT=[['fData','data'],['fComp','competicao'],['fCat','categoria'],
+           ['fRod','rodada'],['fLocal','local']];
+function preencheIdent(){
+  IDENT.forEach(function(o){
+    var i=$('#'+o[0]);
+    if(document.activeElement!==i) i.value=S[o[1]]||'';
+  });
+  var a=$('#fAnalista');
+  if(document.activeElement!==a) a.value=(P&&P.analista)||'';
+  var im=$('#escPrev');
+  if(P&&P.escudo){ im.src=P.escudo; im.hidden=false; }
+  else{ im.removeAttribute('src'); im.hidden=true; }
+}
+IDENT.forEach(function(o){
+  $('#'+o[0]).addEventListener('input',function(){
+    S[o[1]]=this.value; save(); renderReport();
+  });
+});
+$('#fAnalista').addEventListener('input',function(){
+  if(P) P.analista=this.value;
+  save(); renderReport();
+});
+$('#fEscudo').addEventListener('change',function(){
+  var f=this.files[0]; this.value='';
+  if(!f||!P) return;
+  var r=new FileReader();
+  r.onload=function(){
+    var im=new Image();
+    im.onload=function(){
+      /* encolhe para 256 px: escudo grande incha o banco do navegador e o
+         backup .json, e no papel sai do mesmo tamanho */
+      var lado=Math.max(im.width,im.height), k=lado>256?256/lado:1;
+      var c=document.createElement('canvas');
+      c.width=Math.round(im.width*k)||1; c.height=Math.round(im.height*k)||1;
+      var ctx=c.getContext?c.getContext('2d'):null;
+      try{
+        if(ctx){ ctx.drawImage(im,0,0,c.width,c.height); P.escudo=c.toDataURL('image/png'); }
+        else P.escudo=r.result;
+      }catch(e){ P.escudo=r.result; }
+      save(); gravaJa(); preencheIdent(); renderReport(); toast('Escudo atualizado');
+    };
+    im.onerror=function(){ P.escudo=r.result; save(); gravaJa(); preencheIdent(); renderReport(); };
+    im.src=r.result;
+  };
+  r.readAsDataURL(f);
+});
+$('#delEscudo').addEventListener('click',function(){
+  if(!P||!P.escudo) return;
+  delete P.escudo;
+  save(); gravaJa(); preencheIdent(); renderReport(); toast('Escudo removido');
+});
+
+/* ---------- temporada ----------
+   Soma todas as partidas do scout. Para reaproveitar as contas de uma partida
+   só, troca o S por cada partida guardada, mede, e devolve o S no fim — nada
+   renderiza aqui dentro, então ninguém vê o troca-troca. */
+function comPartida(m,fn){
+  var guardaS=S, guardaP=PERF, r;
+  S=m; PERF=0; zeraIndice();
+  try{ r=fn(); }
+  finally{ S=guardaS; PERF=guardaP; zeraIndice(); }
+  return r;
+}
+var COLS_TEMP=['J','MIN','G','A','CC','CE','Chutes %','PC','PE','FC','CA','CV','A/M','G/J'];
+function renderTemporada(){
+  var resumo=$('#tempResumo'), tbl=$('#tblTemp'), info=$('#tempInfo');
+  if(!P){ info.textContent='Nenhum scout aberto.'; return; }
+  info.textContent='Somando as partidas...';
+  gravaJa();
+  partidasDoPerfil(P.id).then(function(ms){
+    var v=0,e=0,d=0,gp=0,gc=0,tot={},ordem=[];
+    /* da mais antiga para a mais nova: o nome e o número que valem são os
+       últimos que o atleta teve */
+    ms.slice().reverse().forEach(function(m){
+      normaliza(m);
+      comPartida(m,function(){
+        var g=sumAll('G'), s=sumAll('GS');
+        gp+=g; gc+=s;
+        if(g>s)v++; else if(g<s)d++; else e++;
+        S.players.forEach(function(p){
+          var t=tot[p.id];
+          if(!t){
+            t=tot[p.id]={j:0,seg:0,acoes:0};
+            COLS_TEMP.forEach(function(c){ t[c]=0; });
+            ordem.push(t);
+          }
+          var acoes=acoesDe(p.id), seg=minutosDe(p.id);
+          t.num=p.num; t.name=p.name;
+          if(acoes||seg) t.j++;
+          t.seg+=seg; t.acoes+=acoes;
+          ['G','A','CC','CE','PC','PE','FC','CA','CV'].forEach(function(c){
+            t[c]+=count(p.id,c);
+          });
+        });
+      });
+    });
+
+    resumo.textContent='';
+    var top=el('div','top');
+    top.appendChild(el('span','pl',v+'-'+e+'-'+d));
+    top.appendChild(el('span','quem',ms.length+(ms.length===1?' partida':' partidas')+
+      ' · '+v+(v===1?' vitória':' vitórias')+', '+e+(e===1?' empate':' empates')+', '+
+      d+(d===1?' derrota':' derrotas')));
+    resumo.appendChild(top);
+    resumo.appendChild(el('div','meta','Gols '+gp+' × '+gc+
+      (ms.length?' · '+(gp/ms.length).toFixed(1)+' feitos e '+(gc/ms.length).toFixed(1)+
+       ' sofridos por jogo':'')));
+
+    ordem.sort(function(a,b){
+      return (b.G-a.G) || (b.A-a.A) || (b.seg-a.seg);
+    });
+    tbl.textContent='';
+    var thead=el('thead'), tr=el('tr');
+    tr.appendChild(el('th','l','#')); tr.appendChild(el('th','l','Atleta'));
+    COLS_TEMP.forEach(function(c){ tr.appendChild(el('th','num',c)); });
+    thead.appendChild(tr); tbl.appendChild(thead);
+    var tb=el('tbody');
+    ordem.forEach(function(t){
+      var chutes=t.G+t.CC+t.CE;
+      var linha=[t.j, t.seg?fmt(t.seg):'—', t.G, t.A, t.CC, t.CE,
+        chutes?pct(t.G+t.CC,chutes).toFixed(1)+'%':'—',
+        t.PC, t.PE, t.FC, t.CA, t.CV,
+        t.seg?(t.acoes*60/t.seg).toFixed(1):'—',
+        t.j?(t.G/t.j).toFixed(1):'—'];
+      var r=el('tr');
+      r.appendChild(el('td','l num',String(t.num)));
+      r.appendChild(el('td','l',t.name));
+      linha.forEach(function(x){
+        var vazio = x===0 || x==='—';
+        r.appendChild(el('td','num'+(vazio?' z':''),String(x)));
+      });
+      tb.appendChild(r);
+    });
+    tbl.appendChild(tb);
+    info.textContent = ms.length
+      ? 'Ordenado por gols. J = jogos com registro · MIN = tempo em quadra · A/M = ações por minuto · G/J = gols por jogo.'
+      : 'Nenhuma partida guardada ainda neste scout.';
+  });
 }
 
 /* ---------- comparação ---------- */
@@ -1819,8 +2341,17 @@ function csvEsc(v){ v=String(v==null?'':v); return /[";\n]/.test(v)?'"'+v.replac
 function csv(rows){ return rows.map(function(r){return r.map(csvEsc).join(';');}).join('\n'); }
 
 function pad2(n){ return (n<10?'0':'')+n; }
-function dateBR(){ var d=new Date(); return pad2(d.getDate())+'/'+pad2(d.getMonth()+1)+'/'+d.getFullYear(); }
-function dateISO(){ var d=new Date(); return d.getFullYear()+'-'+pad2(d.getMonth()+1)+'-'+pad2(d.getDate()); }
+function dataISOde(ms){
+  var d=new Date(ms||Date.now());
+  return d.getFullYear()+'-'+pad2(d.getMonth()+1)+'-'+pad2(d.getDate());
+}
+function brDeISO(iso){
+  var p=String(iso||'').split('-');
+  return p.length===3 ? p[2]+'/'+p[1]+'/'+p[0] : dataISOde(Date.now());
+}
+/* data do jogo — relatório, planilha e nome de arquivo saem por ela */
+function dateBR(){ return brDeISO(S&&S.data); }
+function dateISO(){ return (S&&S.data)||dataISOde(Date.now()); }
 function slug(s){
   s=String(s||'').trim();
   try{ s=s.normalize('NFD').replace(/[\u0300-\u036f]/g,''); }catch(e){}
@@ -1836,16 +2367,19 @@ var HEAD_LINE=['G','A','PC','PE','Passes T','Passes %','CC','CE','Chutes T','Chu
 var HEAD_GK  =['GS','D','F','CC','CE','Chutes T','Chutes %','PC','PE','Passes T','Passes %','RC','RE','Reposicoes T','Reposicoes %','FS','FC','AI','CA','CV'];
 
 function statBlock(out,title,players,cols,head){
-  out.push([title,'#','Jogador'].concat(head));
+  out.push([title,'#','Jogador'].concat(head,['MIN','A/M']));
+  var somaSeg=0;
   players.forEach(function(p){
+    var ex=extrasDe(p);
+    somaSeg+=ex[0];
     out.push([''].concat([p.num,p.name],rowVals(p).map(function(x,i){
       return cols[i]==='%' ? x.toFixed(1).replace('.',',') : x;
-    })));
+    }),[fmt(ex[0]), ex[1].toFixed(1).replace('.',',')]));
   });
   if(players.length){
     out.push(['','','TOTAL'].concat(groupVals(players).map(function(x,i){
       return cols[i]==='%' ? x.toFixed(1).replace('.',',') : x;
-    })));
+    }),[fmt(somaSeg),'']));
   }
 }
 
@@ -1854,7 +2388,12 @@ function buildFullCsv(){
   var out=[];
   out.push(['SCOUT FUTSAL — relatório da partida']);
   out.push(['Scout',P?P.nome:'—']);
-  out.push(['Data',dateBR()]);
+  out.push(['Analista',(P&&P.analista)||'—']);
+  out.push(['Data do jogo',dateBR()]);
+  out.push(['Competição',S.competicao||'—']);
+  out.push(['Categoria',S.categoria||'—']);
+  out.push(['Rodada',S.rodada||'—']);
+  out.push(['Local',S.local||'—']);
   out.push(['Nossa equipe',S.team]);
   out.push(['Adversário',S.opp]);
   out.push(['Tempo do 1º tempo',fmt(tempoDe(1))]);
@@ -1889,12 +2428,23 @@ function buildFullCsv(){
   });
   out.push([]);
 
-  out.push(['CAMPOGRAMA','tempo','minuto','#','Jogador','tipo','x_m','y_m']);
+  out.push(['CAMPOGRAMA','lado','tempo','minuto','#','Jogador','tipo','zona','x_m','y_m']);
   S.shots.forEach(function(s){
     var e=null,i;
     for(i=0;i<S.events.length;i++) if(S.events[i].id===s.ev){e=S.events[i];break;}
-    out.push(['',e?e.per:'',e?fmt(e.t):'',s.num,'',DESC[s.m]||s.m,
+    out.push(['',s.adv?'adversário':'nós',e?e.per:'',e?fmt(e.t):'',s.num,'',DESC[s.m]||s.m,
+      ZONA_TAG[zonaDe(s.x,s.y)]+(zonaDe(s.x,s.y)<3?' 1':' 2'),
       (s.x/10).toFixed(1).replace('.',','),(s.y/10).toFixed(1).replace('.',',')]);
+  });
+  out.push([]);
+  [['nós',false],['adversário',true]].forEach(function(o){
+    var z=statsZonas(o[1]), i;
+    out.push(['ZONAS — '+o[0],'zona','finalizações','gols','aproveitamento']);
+    for(i=0;i<6;i++){
+      out.push(['',ZONA_TAG[i]+(i<3?' 1':' 2'),z[i].t,z[i].g,
+        z[i].t?pct(z[i].g,z[i].t).toFixed(1).replace('.',',')+'%':'']);
+    }
+    out.push([]);
   });
   return csv(out);
 }
@@ -1903,8 +2453,8 @@ function buildFullCsv(){
 function buildTxt(){
   var L=[];
   L.push((S.team||'Nós')+' '+sumAll('G')+' × '+sumAll('GS')+' '+(S.opp||'Adversário'));
-  L.push(dateBR()+' · 1ºT '+fmt(tempoDe(1))+' · 2ºT '+fmt(tempoDe(2))+
-         ' · total '+fmt(tempoTotal()));
+  L.push(identLinha());
+  L.push('1ºT '+fmt(tempoDe(1))+' · 2ºT '+fmt(tempoDe(2))+' · total '+fmt(tempoTotal()));
   L.push('');
   /* o resumo é sempre do jogo todo, mesmo com filtro na tela */
   var guarda=PERF; PERF=0;
@@ -1940,6 +2490,7 @@ function buildTxt(){
   listBy('PE','Passes errados');
   listBy('CA','Cartões amarelos');
   listBy('CV','Cartões vermelhos');
+  if(P&&P.analista){ L.push(''); L.push('Análise: '+P.analista); }
   return L.join('\n')+'\n';
 }
 
@@ -1955,7 +2506,18 @@ function exportTxt(){
 $('#expRepCsv').addEventListener('click',exportFullCsv);
 $('#expRepTxt').addEventListener('click',exportTxt);
 $('#expTxt2').addEventListener('click',exportTxt);
-$('#printRep').addEventListener('click',function(){ window.print(); });
+/* O PDF é o que circula no grupo do time. Sai com relatório, estatísticas e
+   campograma: as outras abas ficam com hidden, e sem isto o documento saía
+   pela metade, com o relatório e mais nada. */
+function imprime(){
+  var noPapel=['relatorio','estatisticas','campograma'], estado={};
+  ABAS.forEach(function(id){ estado[id]=$('#'+id).hidden; });
+  ABAS.forEach(function(id){ $('#'+id).hidden = noPapel.indexOf(id)<0; });
+  noPapel.forEach(renderAba);
+  window.print();
+  ABAS.forEach(function(id){ $('#'+id).hidden=estado[id]; });
+}
+$('#printRep').addEventListener('click',imprime);
 $('#copyRep').addEventListener('click',function(){
   var txt=buildTxt();
   function fallback(){
@@ -2000,7 +2562,8 @@ $('#expJson').addEventListener('click',function(){
   gravaJa();
   partidasDoPerfil(P.id).then(function(ms){
     var pacote={ versao:2, gerado:Date.now(), perfil:P, partidas:ms };
-    dl('backup_'+slug(P.nome)+'_'+dateISO()+'.json',JSON.stringify(pacote,null,1),'application/json');
+    dl('backup_'+slug(P.nome)+'_'+dataISOde(Date.now())+'.json',
+       JSON.stringify(pacote,null,1),'application/json');
     toast(ms.length+(ms.length===1?' partida no backup':' partidas no backup'));
   });
 });
@@ -2061,34 +2624,69 @@ $('#themeBtn').addEventListener('click',function(){
 });
 
 /* ---------- abas ---------- */
+var ABAS=['registro','campograma','estatisticas','relatorio','comparacao','temporada',
+          'partidas','plantel','dados'];
+/* Ao vivo só existem duas abas. Oito no topo, em pé na beira da quadra, é
+   toque errado esperando acontecer. */
+var ABAS_JOGO=['registro','campograma'];
 var tabs=[].slice.call(document.querySelectorAll('.tab'));
+function abaAtual(){
+  var t=document.querySelector('.tab[aria-selected="true"]');
+  return t?t.dataset.t:'registro';
+}
+function abre(id){
+  tabs.forEach(function(o){o.setAttribute('aria-selected',String(o.dataset.t===id));});
+  ABAS.forEach(function(x){ $('#'+x).hidden = (x!==id); });
+  window.scrollTo(0,0);
+  renderAba(id);
+}
 tabs.forEach(function(t){
-  t.addEventListener('click',function(){
-    tabs.forEach(function(o){o.setAttribute('aria-selected',String(o===t));});
-    ['registro','campograma','estatisticas','relatorio','comparacao','partidas','plantel','dados']
-      .forEach(function(id){ $('#'+id).hidden = (id!==t.dataset.t); });
-    window.scrollTo(0,0);
-    if(t.dataset.t==='campograma') renderPitch();
-    if(t.dataset.t==='partidas') renderPartidas();
-  });
+  t.addEventListener('click',function(){ abre(t.dataset.t); });
 });
 
 /* ---------- render ---------- */
+/* Cada aba se monta sozinha. Um toque no jogo refaz só o que está na tela —
+   antes refazia as oito abas, e no segundo tempo com plantel cheio isso
+   aparecia como atraso no dedo. O que está escondido recalcula quando aparece:
+   tudo sai dos eventos, então não existe número guardado para ficar velho. */
+function renderAba(id){
+  zeraIndice();
+  if(id==='registro'){
+    renderRoster(); renderActions(); renderViewSw();
+    renderQuadra(); renderReservas(); renderQuadraActions(); renderLog();
+  }
+  else if(id==='campograma'){ renderShotSide(); renderShotModes(); renderPitch(); renderShotInfo(); }
+  else if(id==='estatisticas'){ renderPerFiltro(); renderStats(); renderLegend(); }
+  else if(id==='relatorio'){ renderPerFiltro(); renderReport(); }
+  else if(id==='comparacao'){ renderCompare(); }
+  else if(id==='temporada'){ renderTemporada(); }
+  else if(id==='partidas'){ renderPartidas(); }
+  else if(id==='plantel'){ renderPlantel(); }
+}
+function aplicaModo(){
+  var jogo=CFG.modo==='jogo';
+  tabs.forEach(function(t){ t.hidden = jogo && ABAS_JOGO.indexOf(t.dataset.t)<0; });
+  $('#modoBtn').textContent = jogo?'Modo jogo':'Modo análise';
+  $('#modoBtn').classList.toggle('on',jogo);
+  if(jogo && ABAS_JOGO.indexOf(abaAtual())<0) abre('registro');
+}
+$('#modoBtn').addEventListener('click',function(){
+  CFG.modo = CFG.modo==='jogo' ? 'analise' : 'jogo';
+  gravaJa(); aplicaModo();
+  toast(CFG.modo==='jogo' ? 'Modo jogo: só Registro e Campograma'
+                          : 'Modo análise: todas as abas');
+});
 function renderAll(){
-  renderScore(); renderRoster(); renderActions(); renderLog();
-  renderViewSw(); renderQuadra(); renderReservas(); renderQuadraActions();
-  renderPerFiltro(); renderStats(); renderReport(); renderCompare(); renderPlantel();
-  renderShotInfo(); renderLegend(); renderPerfilChip();
-  if(!$('#campograma').hidden) renderPitch();
-  /* a aba Partidas lê o banco; só vale o custo quando ela está à vista */
-  if(!$('#partidas').hidden) renderPartidas();
+  zeraIndice();
+  renderScore(); renderFaltas(); renderPerfilChip();
+  renderAba(abaAtual());
 }
 function boot(){
   if(CFG.theme) document.documentElement.setAttribute('data-theme',CFG.theme);
   $('#teamName').value=S.team; $('#oppName').value=S.opp;
   $('#clockBtn').textContent=S.run.on?'Pausar':'Iniciar';
   $('#clockBtn').classList.toggle('on',!!S.run.on);
-  tickClock(); renderShotModes(); renderPitch(); renderAll(); mostraVersao();
+  tickClock(); renderShotSide(); renderShotModes(); aplicaModo(); renderAll(); mostraVersao();
   var h=document.querySelector('header.board').offsetHeight;
   document.documentElement.style.setProperty('--tabtop',h+'px');
   if(banco.modo()==='memoria')
