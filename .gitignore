@@ -8,7 +8,12 @@
 relatorio_*.csv
 resumo_*.txt
 eventos_*.csv
-backup_*.json
+
+# Backup do app: leva nome de atleta e o PIN do perfil. Nenhum .json entra no
+# repositório sem ser liberado aqui embaixo, um por um.
+*.json
+!vercel.json
+!.claude/**/*.json
 
 # Sistema
 .DS_Store

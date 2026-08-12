@@ -22,15 +22,40 @@ no próprio aparelho.
   certo/errado). Placar, **dois cronômetros — um para cada tempo** — e cinco
   botões livres em que você troca a sigla *e* a descrição para o que quiser
   marcar.
+
+  No cabeçalho, as **faltas acumuladas do tempo** (nós e eles): fica amarelo na
+  quarta e vermelho na quinta, que é quando vira tiro livre de 10 m sem
+  barreira. Com o cronômetro andando a **tela não apaga** sozinha.
+
+  O botão **Modo jogo** deixa só Registro e Campograma no topo — ao vivo, oito
+  abas é toque errado esperando acontecer. **Modo análise** devolve todas.
+
+  Em *Últimos registros* dá para **trocar o jogador** de um registro antigo ou
+  **apagar** um registro errado, sem desfazer tudo o que veio depois.
 - **Partidas** — vários scouts no mesmo aparelho, cada um com o próprio plantel
   e o próprio histórico de jogos. Reabra qualquer partida anterior.
 - **Campograma** — toca na quadra onde saiu a finalização; entra na conta do
-  jogador selecionado e vira coordenada em metros na exportação.
+  jogador selecionado e vira coordenada em metros na exportação. Dá para marcar
+  as finalizações **do adversário** também (entram na conta do goleiro que está
+  em quadra, e saem como quadrado no desenho): é a leitura defensiva que faltava.
+  A quadra vem dividida em **seis zonas** — defesa, meio e ataque, em dois
+  corredores — com gols ÷ finalizações e o aproveitamento de cada uma.
 - **Estatísticas** — tabela por jogador, com totais e precisão de passe e chute.
   Filtro **jogo todo / 1º tempo / 2º tempo** no topo, que também vale no relatório.
+  Traz **MIN** (tempo em quadra) e **A/M** (ações por minuto): num esporte de
+  rodízio, 3 gols em 8 minutos e 3 gols em 30 não são a mesma linha. A
+  minutagem sai das substituições, que viram evento (`SUB`).
 - **Relatório** — o resumo da partida contra o adversário: placar, chutes,
   chutes a gol, precisão, **passes errados**, escanteios, faltas e cartões.
+  Em *Identificação* você põe **data do jogo, competição, categoria, rodada,
+  local, analista e o escudo do time** — tudo isso vai para o cabeçalho do PDF,
+  para o CSV e para o resumo em texto, com uma linha de assinatura no fim.
+  A data é a **do jogo**, não a de hoje: reabrir uma partida de duas semanas
+  atrás e imprimir sai com a data certa.
 - **Comparação** — dois jogadores lado a lado.
+- **Temporada** — soma todas as partidas do scout: vitórias, empates e derrotas,
+  gols por jogo, e a tabela por atleta com jogos, minutos, gols, assistências,
+  aproveitamento de chute, ações por minuto e gols por jogo, ordenada por gols.
 - **Exportação** — CSV completo (relatório + estatísticas **do jogo todo, do 1º
   e do 2º tempo** + botões livres + campograma), resumo em texto para colar no
   grupo, impressão em PDF e backup `.json` que reabre a partida inteira em outro
@@ -41,6 +66,9 @@ no próprio aparelho.
 **No link:** abra uma vez com internet e use o botão Compartilhar →
 *Adicionar à Tela de Início* (iPad) ou *Instalar* (Chrome). Depois disso abre em
 tela cheia e funciona sem sinal — um service worker guarda o app no aparelho.
+
+O **PDF sai inteiro** — relatório, estatísticas por jogador e campograma, cada
+bloco em sua página.
 
 **Sem depender do navegador:** na aba **Dados**, botão *Baixar o app (.html)*.
 Sai um arquivo único com o app inteiro dentro; guarde no aparelho e abra com dois
@@ -56,6 +84,11 @@ nem quando tem internet.
 Três coleções: `perfis` (o scout, seu plantel e seus botões livres), `partidas`
 (uma por jogo, ligada ao perfil) e `app` (qual perfil e qual partida estão
 abertos, e o tema). Grava sozinho a cada toque.
+
+**Nunca versione um backup.** Ele leva o PIN do perfil, o nome do time e o nome
+de cada atleta — nome de atleta de base em repositório é dor de cabeça garantida
+com pai de jogador. O `.gitignore` bloqueia todo `.json` justamente por isso, com
+exceção nominal só para `vercel.json` e para os arquivos de `.claude/`.
 
 Isso significa que **os dados não atravessam aparelhos.** Cada iPad tem o próprio
 banco. Para levar um scout inteiro de um aparelho para outro — perfil, plantel e
@@ -145,6 +178,12 @@ CA/CV cartões
 **Goleiro:** GS gol sofrido · D defesa · F chute do adversário fora · CC/CE
 chute certo/errado (do goleiro) · PC/PE passe · RC/RE reposição · FS/FC falta ·
 AI ação individual · CA/CV cartões
+
+**Campograma do adversário:** GS gol sofrido · D defesa · F pra fora — os
+mesmos códigos do painel do goleiro, com o lugar do chute junto.
+
+**Substituição:** SUB, gravada com quem entrou e quem saiu. Não conta em
+nenhuma estatística; serve para a minutagem.
 
 **Livres:** L1..L5 de fábrica — na aba Plantel você troca a sigla e a descrição
 de cada um. Por dentro o código continua L1..L5, então trocar a sigla no meio do
