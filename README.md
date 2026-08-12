@@ -121,8 +121,20 @@ também. Nunca marque um jogo de verdade no endereço de teste — não tem como
 trazer os dados de lá para cá, a não ser exportando o backup `.json` num e
 restaurando no outro.
 
-Depois de um deploy novo, o app abre a versão em cache e baixa a nova em segundo
-plano: ela entra no abrir seguinte. Fechar e abrir de novo resolve.
+### Versão nova chega sozinha
+
+Cada `python3 build.py` carimba uma versão (hash do fonte) no `index.html` e no
+nome do cache do `sw.js`. Com isso o aparelho percebe que saiu build novo: o
+service worker novo assume na hora e **a página recarrega sozinha** — sem fechar
+e abrir o app.
+
+A única exceção é o jogo em andamento: **com o cronômetro correndo o app nunca
+recarrega sozinho**, aparece um botão *Versão nova · atualizar* e quem decide é o
+scout. O HTML passou a ser buscado na rede primeiro (cache só de reserva), então
+abrir com sinal já traz a versão do dia; sem sinal abre a última guardada.
+
+A versão que está rodando no aparelho aparece na aba **Dados → Versão**. É por
+ela que você confere se o iPad já pegou o build novo.
 
 ## Códigos do scout
 

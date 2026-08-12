@@ -567,6 +567,9 @@
     </div>
     <h2 class="sec">Aparência</h2>
     <div class="bar"><button class="btn" id="themeBtn">Alternar claro / escuro</button></div>
+
+    <h2 class="sec">Versão</h2>
+    <p class="hint" id="verInfo" style="margin:0"></p>
   </section>
 </div>
 
@@ -2067,7 +2070,7 @@ function boot(){
   $('#teamName').value=S.team; $('#oppName').value=S.opp;
   $('#clockBtn').textContent=S.run.on?'Pausar':'Iniciar';
   $('#clockBtn').classList.toggle('on',!!S.run.on);
-  tickClock(); renderShotModes(); renderPitch(); renderAll();
+  tickClock(); renderShotModes(); renderPitch(); renderAll(); mostraVersao();
   var h=document.querySelector('header.board').offsetHeight;
   document.documentElement.style.setProperty('--tabtop',h+'px');
   if(banco.modo()==='memoria')
@@ -2077,6 +2080,17 @@ window.addEventListener('resize',function(){
   var h=document.querySelector('header.board').offsetHeight;
   document.documentElement.style.setProperty('--tabtop',h+'px');
 });
+
+/* A página publicada avisa quando sai versão nova. Ela pergunta isto antes de
+   recarregar sozinha: com o relógio andando, quem decide é o scout. */
+window.SF_ocupado=function(){ return !!(S&&S.run&&S.run.on); };
+
+function mostraVersao(){
+  var m=document.querySelector('meta[name="sf-versao"]');
+  $('#verInfo').textContent = m && m.content
+    ? 'Versão '+m.content+' · o app se atualiza sozinho quando sai versão nova (com o relógio parado).'
+    : 'Arquivo local — esta cópia não se atualiza sozinha. Baixe o app de novo quando quiser a versão nova.';
+}
 
 iniciar().then(boot,function(e){
   /* se o banco falhar de vez, o app ainda abre — só não guarda nada */

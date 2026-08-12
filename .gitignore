@@ -14,3 +14,6 @@ backup_*.json
 .DS_Store
 Thumbs.db
 __pycache__/
+
+# Dumps temporários de trabalho
+tmp-*
