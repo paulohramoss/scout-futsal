@@ -9,7 +9,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Scout Futsal">
-<meta name="sf-versao" content="1dc0af62">
+<meta name="sf-versao" content="062313c8">
 <link rel="manifest" href="./manifest.webmanifest">
 <link rel="icon" href="./icons/icon-192.png">
 <link rel="apple-touch-icon" href="./icons/icon-180.png">
@@ -189,9 +189,11 @@
   .col .sidetit .dot{width:9px;height:9px;border-radius:50%;background:var(--vermelho)}
   .col.pos .sidetit .dot{background:var(--accent)}
   .col h3:first-of-type{margin-top:4px}
-  /* botao ocupa a coluna inteira: encosta a de erro na borda esquerda da tela e
-     a de acerto na direita, e de quebra o alvo de toque fica maior */
-  .col .act.slim{width:100%;margin:0 0 6px}
+  /* coluna de acerto encostada na borda direita da tela, a de erro na esquerda:
+     o botao continua do tamanho do texto, o que muda e de que lado ele encosta */
+  .col{display:flex;flex-direction:column;align-items:flex-start}
+  .col.pos{align-items:flex-end}
+  .col .act.slim{margin:0 0 6px}
   .act.slim{flex-direction:row;align-items:center;gap:8px;min-height:0;padding:8px 10px}
   .act.slim .txt{display:flex;flex-direction:column;min-width:0}
   .act.slim .code{font-size:13px}
