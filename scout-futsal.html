@@ -135,29 +135,29 @@
   .viewsw button[aria-pressed="true"]{background:var(--accent);color:var(--accent-ink);
     border-color:var(--accent)}
   .quadraview{display:grid;gap:10px;padding:10px 0 0;align-items:start;
-    grid-template-columns:minmax(150px,1fr) minmax(220px,340px) minmax(150px,1fr)}
+    grid-template-columns:minmax(150px,1fr) minmax(200px,300px) minmax(150px,1fr)}
   .quadraview[hidden]{display:none}
-  .courtwrap{position:relative;width:100%;max-width:min(320px,42vh);margin:0 auto}
+  .courtwrap{position:relative;width:100%;max-width:min(300px,52vh);margin:0 auto}
   .court{display:block;width:100%;height:auto}
   .marks{position:absolute;inset:0}
   .pnode{position:absolute;transform:translate(-50%,-50%);display:flex;flex-direction:column;
     align-items:center;gap:2px;background:none;border:0;padding:0;cursor:pointer}
-  .pnode .ball{position:relative;width:50px;height:50px;border-radius:50%;
+  .pnode .ball{position:relative;width:58px;height:58px;border-radius:50%;
     background:var(--surface);border:2px solid var(--line);display:grid;place-items:center;
-    font-family:var(--num);font-size:19px;font-weight:700;box-shadow:var(--shadow)}
+    font-family:var(--num);font-size:22px;font-weight:700;box-shadow:var(--shadow)}
   .pnode.gk .ball{border-color:var(--amarelo)}
   .pnode[aria-pressed="true"] .ball{background:var(--accent);color:var(--accent-ink);
     border-color:var(--accent)}
   .pnode.vago .ball{border-style:dashed;color:var(--muted);font-size:22px}
-  .pnode .nm{font-size:11px;font-weight:650;max-width:80px;overflow:hidden;
+  .pnode .nm{font-size:12px;font-weight:650;max-width:96px;overflow:hidden;
     text-overflow:ellipsis;white-space:nowrap}
   .pnode .pos{font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);
     font-weight:700}
-  .pnode .bad{position:absolute;top:-3px;min-width:19px;height:19px;padding:0 4px;
-    border-radius:999px;display:grid;place-items:center;font-family:var(--num);font-size:11px;
+  .pnode .bad{position:absolute;top:-3px;min-width:21px;height:21px;padding:0 5px;
+    border-radius:999px;display:grid;place-items:center;font-family:var(--num);font-size:12px;
     font-weight:700;color:#fff;border:1.5px solid var(--paper)}
-  .pnode .bad.e{left:-9px;background:var(--vermelho)}
-  .pnode .bad.a{right:-9px;background:var(--accent)}
+  .pnode .bad.e{left:-10px;background:var(--vermelho)}
+  .pnode .bad.a{right:-10px;background:var(--accent)}
   .resbar{width:100%;margin-top:12px;border:1px dashed var(--line);background:var(--surface-2);
     border-radius:999px;padding:8px 14px;font-size:13px;font-weight:600;cursor:pointer}
   .resbar:active{transform:scale(.98)}
@@ -176,8 +176,8 @@
   .act.slim .code{font-size:13px}
   .act.slim .desc{font-size:11px}
   .act.slim .cnt{position:static;margin-left:auto;font-size:17px}
-  /* iPad em pé: quadra em cima, colunas de erro e acerto lado a lado embaixo */
-  @media (max-width:860px){
+  /* Celular: quadra em cima, colunas de erro e acerto lado a lado embaixo */
+  @media (max-width:700px){
     .quadraview{grid-template-columns:1fr 1fr}
     .quadraview .mid{grid-column:1 / -1;order:-1}
   }
@@ -427,7 +427,7 @@
       <div class="col" id="colErros"></div>
       <div class="mid">
         <div class="courtwrap">
-          <svg class="court" id="court" viewBox="0 0 200 400" aria-hidden="true"></svg>
+          <svg class="court" id="court" viewBox="0 0 200 300" aria-hidden="true"></svg>
           <div class="marks" id="courtMarks"></div>
         </div>
         <button class="resbar" id="resBar" type="button" aria-expanded="false">Reservas (0)</button>
@@ -1384,21 +1384,22 @@ function renderCourt(){
   p.textContent='';
   var line=getComputedStyle(document.documentElement).getPropertyValue('--line').trim();
   var soft=getComputedStyle(document.documentElement).getPropertyValue('--surface-2').trim();
-  p.appendChild(sv('rect',{x:0,y:0,width:200,height:400,fill:soft,rx:8}));
+  p.appendChild(sv('rect',{x:0,y:0,width:200,height:300,fill:soft,rx:8}));
   var st={fill:'none',stroke:line,'stroke-width':1.6};
   function add(t,a){var e=sv(t,a);for(var k in st) if(!(k in a)) e.setAttribute(k,st[k]);p.appendChild(e);return e;}
-  add('rect',{x:8,y:8,width:184,height:384});
-  add('line',{x1:8,y1:200,x2:192,y2:200});
-  add('circle',{cx:100,cy:200,r:30});
-  // áreas: quarto de círculo de 6 m a partir de cada poste
-  add('path',{d:'M25,8 A60,60 0 0 0 85,68 L115,68 A60,60 0 0 0 175,8'});
-  add('path',{d:'M25,392 A60,60 0 0 1 85,332 L115,332 A60,60 0 0 1 175,392'});
+  add('rect',{x:8,y:6,width:184,height:288});
+  add('line',{x1:8,y1:150,x2:192,y2:150});
+  add('ellipse',{cx:100,cy:150,rx:30,ry:22.5});
+  // áreas: quarto de círculo de 6 m a partir de cada poste, achatado no mesmo
+  // fator da quadra (0,75) para não sair torto em volta do gol
+  add('path',{d:'M25,6 A60,45 0 0 0 85,51 L115,51 A60,45 0 0 0 175,6'});
+  add('path',{d:'M25,294 A60,45 0 0 1 85,249 L115,249 A60,45 0 0 1 175,294'});
   // marcas de penálti (6 m) e segundo penálti (10 m)
-  [[100,68],[100,332],[100,108],[100,292]].forEach(function(c){
+  [[100,51],[100,249],[100,81],[100,219]].forEach(function(c){
     p.appendChild(sv('circle',{cx:c[0],cy:c[1],r:2.5,fill:line}));
   });
-  add('rect',{x:85,y:2,width:30,height:6});
-  add('rect',{x:85,y:392,width:30,height:6});
+  add('rect',{x:85,y:1,width:30,height:5});
+  add('rect',{x:85,y:294,width:30,height:5});
 }
 
 function renderQuadra(){

@@ -12,7 +12,9 @@ no próprio aparelho.
     ala, pivô), cada um com o número e dois selos: erros em vermelho, acertos em
     verde. Toca no jogador para marcar; os botões ficam nas laterais — **erros à
     esquerda, acertos à direita**, agrupados (finalização, passe, disciplina...).
-    A barra **Reservas** abre o banco logo abaixo da quadra: com um jogador
+    No iPad eles ficam na mesma altura da quadra: dá para trocar de jogador e
+    marcar a ação sem rolar a página. Só em tela de celular as duas colunas
+    descem para baixo. A barra **Reservas** abre o banco logo abaixo da quadra: com um jogador
     selecionado, tocar num reserva faz a substituição, e ele entra na mesma
     posição. Slot vazio tem um **+** que chama o banco direto.
   - **Lista** — o formato antigo: fila de jogadores no topo e a grade cheia de
