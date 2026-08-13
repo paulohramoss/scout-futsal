@@ -9,7 +9,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Scout Futsal">
-<meta name="sf-versao" content="062313c8">
+<meta name="sf-versao" content="23c77f07">
 <link rel="manifest" href="./manifest.webmanifest">
 <link rel="icon" href="./icons/icon-192.png">
 <link rel="apple-touch-icon" href="./icons/icon-180.png">
@@ -193,7 +193,9 @@
      o botao continua do tamanho do texto, o que muda e de que lado ele encosta */
   .col{display:flex;flex-direction:column;align-items:flex-start}
   .col.pos{align-items:flex-end}
-  .col .act.slim{margin:0 0 6px}
+  /* largura fixa: botao de texto curto e de texto longo do mesmo tamanho, senao
+     a coluna fica com a borda serrilhada */
+  .col .act.slim{width:100%;max-width:190px;margin:0 0 6px}
   .act.slim{flex-direction:row;align-items:center;gap:8px;min-height:0;padding:8px 10px}
   .act.slim .txt{display:flex;flex-direction:column;min-width:0}
   .act.slim .code{font-size:13px}
