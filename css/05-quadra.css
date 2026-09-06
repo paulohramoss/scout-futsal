@@ -1,0 +1,60 @@
+/* ---------- quadra ---------- */
+.viewsw{display:flex;gap:6px;padding:12px 0 0}
+.viewsw button{border:1px solid var(--line);background:var(--surface-2);border-radius:999px;
+  padding:6px 14px;font-size:13px;font-weight:600;cursor:pointer}
+.viewsw button[aria-pressed="true"]{background:var(--accent);color:var(--accent-ink);
+  border-color:var(--accent)}
+.quadraview{display:grid;gap:10px;padding:10px 0 0;align-items:start;
+  grid-template-columns:minmax(150px,1fr) minmax(200px,300px) minmax(150px,1fr)}
+.quadraview[hidden]{display:none}
+.courtwrap{position:relative;width:100%;max-width:min(300px,52vh);margin:0 auto}
+.court{display:block;width:100%;height:auto}
+.marks{position:absolute;inset:0}
+.pnode{position:absolute;transform:translate(-50%,-50%);display:flex;flex-direction:column;
+  align-items:center;gap:2px;background:none;border:0;padding:0;cursor:pointer}
+.pnode .ball{position:relative;width:58px;height:58px;border-radius:50%;
+  background:var(--surface);border:2px solid var(--line);display:grid;place-items:center;
+  font-family:var(--num);font-size:22px;font-weight:700;box-shadow:var(--shadow)}
+.pnode.gk .ball{border-color:var(--amarelo)}
+.pnode[aria-pressed="true"] .ball{background:var(--accent);color:var(--accent-ink);
+  border-color:var(--accent)}
+.pnode.vago .ball{border-style:dashed;color:var(--muted);font-size:22px}
+.pnode .nm{font-size:12px;font-weight:650;max-width:96px;overflow:hidden;
+  text-overflow:ellipsis;white-space:nowrap}
+.pnode .pos{font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);
+  font-weight:700}
+.pnode .bad{position:absolute;top:-3px;min-width:21px;height:21px;padding:0 5px;
+  border-radius:999px;display:grid;place-items:center;font-family:var(--num);font-size:12px;
+  font-weight:700;color:#fff;border:1.5px solid var(--paper)}
+.pnode .bad.e{left:-10px;background:var(--vermelho)}
+.pnode .bad.a{right:-10px;background:var(--accent)}
+.resbar{width:100%;margin-top:12px;border:1px dashed var(--line);background:var(--surface-2);
+  border-radius:999px;padding:8px 14px;font-size:13px;font-weight:600;cursor:pointer}
+.resbar:active{transform:scale(.98)}
+.reslist{display:flex;flex-wrap:wrap;gap:6px;padding:10px 0 0}
+.reslist[hidden]{display:none}
+.livtit,.col h3{font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);
+  margin:14px 0 6px;font-weight:700}
+.livres{display:grid;grid-template-columns:repeat(auto-fill,minmax(92px,1fr));gap:6px}
+.col .sidetit{display:flex;align-items:center;gap:7px;font-size:12px;font-weight:700;
+  letter-spacing:.06em;text-transform:uppercase;padding:2px 0 6px}
+.col .sidetit .dot{width:9px;height:9px;border-radius:50%;background:var(--vermelho)}
+.col.pos .sidetit .dot{background:var(--accent)}
+.col h3:first-of-type{margin-top:4px}
+/* coluna de acerto encostada na borda direita da tela, a de erro na esquerda:
+   o botao continua do tamanho do texto, o que muda e de que lado ele encosta */
+.col{display:flex;flex-direction:column;align-items:flex-start}
+.col.pos{align-items:flex-end}
+/* largura fixa: botao de texto curto e de texto longo do mesmo tamanho, senao
+   a coluna fica com a borda serrilhada */
+.col .act.slim{width:100%;max-width:190px;margin:0 0 6px}
+.act.slim{flex-direction:row;align-items:center;gap:8px;min-height:0;padding:8px 10px}
+.act.slim .txt{display:flex;flex-direction:column;min-width:0}
+.act.slim .code{font-size:13px}
+.act.slim .desc{font-size:11px}
+.act.slim .cnt{position:static;margin-left:auto;font-size:17px}
+/* Celular: quadra em cima, colunas de erro e acerto lado a lado embaixo */
+@media (max-width:700px){
+  .quadraview{grid-template-columns:1fr 1fr}
+  .quadraview .mid{grid-column:1 / -1;order:-1}
+}

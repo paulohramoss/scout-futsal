@@ -1,0 +1,15 @@
+/* ---------- impressão / PDF ---------- */
+@media print{
+  @page{margin:12mm}
+  html,body{background:#fff;color:#000}
+  header.board, nav.tabs, .bar, .roster, .toast, .segper, .modes,
+  .viewsw, .quadraview, #listaView, .idform{display:none !important}
+  #estatisticas, #campograma{break-before:page;page-break-before:always}
+  table, .rep, .pitchwrap{break-inside:avoid;page-break-inside:avoid}
+  .wrap{padding:0;max-width:none}
+  .printonly{display:block;margin:0 0 14px}
+  .card,.rep,.tw,.pitchwrap{box-shadow:none}
+  .rep,.tw{border-color:#bbb}
+  .rep .row{break-inside:avoid}
+  h2.sec{margin:16px 0 8px}
+}

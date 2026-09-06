@@ -1,0 +1,9 @@
+/* ---------- pitch ---------- */
+.pitchwrap{background:var(--surface);border:1px solid var(--line-soft);border-radius:var(--r);
+  padding:10px;box-shadow:var(--shadow)}
+svg.pitch{width:100%;height:auto;display:block;touch-action:manipulation}
+.modes{display:flex;gap:8px;flex-wrap:wrap;margin:12px 0}
+.mode{border:1px solid var(--line);background:var(--surface);border-radius:999px;
+  padding:9px 15px;font-size:14px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:7px}
+.mode .dot{width:11px;height:11px;border-radius:50%}
+.mode[aria-pressed="true"]{border-color:var(--ink);box-shadow:0 0 0 1.5px var(--ink) inset}
