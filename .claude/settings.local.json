@@ -1,0 +1,32 @@
+{
+  "permissions": {
+    "allow": [
+      "WebFetch(domain:claude.ai)",
+      "Bash(python3 -)",
+      "Bash(node --check \"/tmp/claude-1000/-home-ramoslenda--rea-de-trabalho-projetos-scout-futsal/86d80151-dd1d-4d1d-83fe-cd00f105059f/scratchpad/app.js\")",
+      "Bash(python3 build.py)",
+      "Bash(python3 -c ' *)",
+      "mcp__5aaced07-8d4c-4adc-bbc4-cbf932497e06__list_teams",
+      "Bash(python3 -c \"import PIL; print\\('PIL', PIL.__version__\\)\")",
+      "Bash(python3 make-icons.py)",
+      "Bash(git init *)",
+      "Bash(git add *)",
+      "Bash(git -c 'user.name=Paulo Ramos' -c user.email=pramosphdr548@gmail.com commit -q -m ' *)",
+      "Bash(gh repo *)",
+      "Bash(git push *)",
+      "mcp__5aaced07-8d4c-4adc-bbc4-cbf932497e06__list_projects",
+      "mcp__5aaced07-8d4c-4adc-bbc4-cbf932497e06__get_project",
+      "mcp__5aaced07-8d4c-4adc-bbc4-cbf932497e06__get_project_deployment_protection",
+      "WebFetch(domain:scout-futsal.vercel.app)",
+      "WebFetch(domain:scoutfutsal.vercel.app)",
+      "mcp__5aaced07-8d4c-4adc-bbc4-cbf932497e06__list_deployments",
+      "WebFetch(domain:scout-futsal-l84lzrquh-paulohramoss-projects.vercel.app)",
+      "Bash(git checkout *)",
+      "Bash(git ls-remote *)",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\" https://scout-futsal-git-staging-paulohramoss-projects.vercel.app)",
+      "Bash(pkill -f \"scout-futsal-git-staging\")",
+      "Bash(curl -s -o /dev/null -D - https://scout-futsal-git-staging-paulohramoss-projects.vercel.app)",
+      "Bash(curl -s -o /dev/null -D - https://scoutfutsal.vercel.app)"
+    ]
+  }
+}

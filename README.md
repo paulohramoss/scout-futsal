@@ -21,9 +21,15 @@ no próprio aparelho.
     botões embaixo.
 
   Painel separado para goleiro (gol sofrido, defesa, reposição, chute
-  certo/errado). Placar, **dois cronômetros — um para cada tempo** — e cinco
-  botões livres em que você troca a sigla *e* a descrição para o que quiser
-  marcar.
+  certo/errado e **gol**, que no futsal o goleiro faz). Placar, **dois
+  cronômetros — um para cada tempo** — e cinco botões livres em que você troca a
+  sigla *e* a descrição para o que quiser marcar.
+
+  **Os dois nomes do placar são campos de texto**: toque em *Nossa equipe* ou em
+  *Adversário* no cabeçalho e escreva quem está jogando. É esse nome que aparece
+  no histórico de partidas, no relatório, no cabeçalho do PDF e no nome do
+  arquivo exportado — é por ele que, meses depois, você sabe que aquele jogo de
+  dia 27 foi contra quem.
 
   No cabeçalho, as **faltas acumuladas do tempo** (nós e eles): fica amarelo na
   quarta e vermelho na quinta, que é quando vira tiro livre de 10 m sem
@@ -177,9 +183,9 @@ ela que você confere se o iPad já pegou o build novo.
 certo/errado · DE desarme · DO desarmado · FS/FC falta sofrida/cometida ·
 CA/CV cartões
 
-**Goleiro:** GS gol sofrido · D defesa · F chute do adversário fora · CC/CE
-chute certo/errado (do goleiro) · PC/PE passe · RC/RE reposição · FS/FC falta ·
-AI ação individual · CA/CV cartões
+**Goleiro:** GS gol sofrido · D defesa · F chute do adversário fora · G gol ·
+CC/CE chute certo/errado (do goleiro) · PC/PE passe · RC/RE reposição · FS/FC
+falta · AI ação individual · CA/CV cartões
 
 **Campograma do adversário:** GS gol sofrido · D defesa · F pra fora — os
 mesmos códigos do painel do goleiro, com o lugar do chute junto.

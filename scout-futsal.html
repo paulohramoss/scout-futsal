@@ -55,10 +55,14 @@
   .score{display:flex;align-items:center;gap:12px}
   .side{display:flex;flex-direction:column;min-width:0}
   .side input{
-    background:transparent;border:0;padding:0;font-weight:650;font-size:14px;
-    letter-spacing:.01em;max-width:150px;min-width:60px;
+    background:transparent;border:0;border-bottom:1px dashed var(--line);
+    padding:2px 4px;font-weight:650;font-size:14px;
+    letter-spacing:.01em;max-width:150px;min-width:60px;border-radius:4px 4px 0 0;
   }
-  .side input:focus{outline:2px solid var(--accent);outline-offset:2px;border-radius:4px}
+  .side input:hover{background:var(--surface-2);border-bottom-color:var(--muted)}
+  .side input:focus{outline:2px solid var(--accent);outline-offset:2px;border-radius:4px;
+    border-bottom-color:transparent}
+  .side input::placeholder{color:var(--muted);font-weight:500}
   .side .lbl{font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
   .digits{font-family:var(--num);font-size:34px;font-weight:700;letter-spacing:-.02em;line-height:1}
   .vs{color:var(--muted);font-size:20px;font-weight:600}
@@ -387,15 +391,15 @@
   <div class="board-in">
     <div class="score">
       <div class="side" style="align-items:flex-end">
-        <span class="lbl">Nossa equipe</span>
-        <input id="teamName" style="text-align:right" value="Minha equipe" aria-label="Nome da nossa equipe">
+        <span class="lbl">Nossa equipe ✎</span>
+        <input id="teamName" style="text-align:right" value="Minha equipe" placeholder="Nossa equipe" aria-label="Nome da nossa equipe">
       </div>
       <span class="digits" id="scoreUs">0</span>
       <span class="vs">×</span>
       <span class="digits" id="scoreThem">0</span>
       <div class="side">
-        <span class="lbl">Adversário</span>
-        <input id="oppName" value="Adversário" aria-label="Nome do adversário">
+        <span class="lbl">Adversário ✎</span>
+        <input id="oppName" value="Adversário" placeholder="Adversário" aria-label="Nome do adversário">
       </div>
     </div>
     <div class="clock">
@@ -685,6 +689,7 @@ var GK=[
   {c:'F',  d:'Chute do adv. fora',k:'pos', g:'Goleiro',     s:'a'},
   {c:'AI', d:'Ação individual',   k:'pos', g:'Goleiro',     s:'a'},
   {c:'GS', d:'Gol sofrido',       k:'gol', g:'Goleiro',     s:'e'},
+  {c:'G',  d:'Gol',               k:'gol', g:'Finalização', s:'a'},
   {c:'CC', d:'Chute certo',       k:'pos', g:'Finalização', s:'a'},
   {c:'CE', d:'Chute errado',      k:'neg', g:'Finalização', s:'e'},
   {c:'RC', d:'Reposição certa',   k:'pos', g:'Reposição',   s:'a'},
@@ -1731,14 +1736,14 @@ $('#clearShots').addEventListener('click',function(){
 
 /* ---------- estatísticas ---------- */
 var COLS_LINE=['G','A','PC','PE','T','%','CC','CE','T','%','DE','DO','FS','FC','CA','CV'];
-var COLS_GK  =['GS','D','F','CC','CE','T','%','PC','PE','T','%','RC','RE','T','%','FS','FC','AI','CA','CV'];
+var COLS_GK  =['GS','D','F','G','CC','CE','T','%','PC','PE','T','%','RC','RE','T','%','FS','FC','AI','CA','CV'];
 
 /* T e % de chute incluem o gol: gol é finalização no alvo.
    Assim o scout toca só "G" quando sai gol, sem precisar tocar CC junto. */
 function vals(c,gk){
   if(gk){
     var tp=c('PC')+c('PE'), tr=c('RC')+c('RE'), tcg=c('G')+c('CC')+c('CE');
-    return [c('GS'),c('D'),c('F'),c('CC'),c('CE'),tcg,pct(c('G')+c('CC'),tcg),
+    return [c('GS'),c('D'),c('F'),c('G'),c('CC'),c('CE'),tcg,pct(c('G')+c('CC'),tcg),
             c('PC'),c('PE'),tp,pct(c('PC'),tp),c('RC'),c('RE'),tr,pct(c('RC'),tr),
             c('FS'),c('FC'),c('AI'),c('CA'),c('CV')];
   }
@@ -2309,9 +2314,11 @@ $('#delPerfil').addEventListener('click',function(){
 
 /* ---------- legenda ---------- */
 function renderLegend(){
-  var parts=[];
+  var parts=[], vistos={};
+  /* o mesmo código aparece nas duas tabelas (CC, PC, FS...); a legenda cita uma vez */
   LINE.concat(GK).concat(TEAM).forEach(function(a){
-    if(parts.indexOf(a.c)<0) parts.push('<b>'+a.c+'</b> '+a.d);
+    if(vistos[a.c]) return;
+    vistos[a.c]=1; parts.push('<b>'+a.c+'</b> '+a.d);
   });
   parts.push('<b>T</b> Total · <b>%</b> Precisão');
   S.freeLabels.forEach(function(l,i){parts.push('<b>'+sigla(FREE[i])+'</b> '+l);});
@@ -2354,7 +2361,7 @@ function fileName(prefix,ext){
 }
 /* COLS_LINE/COLS_GK repetem "T" e "%"; na planilha isso confunde, então aqui vão nomes únicos */
 var HEAD_LINE=['G','A','PC','PE','Passes T','Passes %','CC','CE','Chutes T','Chutes %','DE','DO','FS','FC','CA','CV'];
-var HEAD_GK  =['GS','D','F','CC','CE','Chutes T','Chutes %','PC','PE','Passes T','Passes %','RC','RE','Reposicoes T','Reposicoes %','FS','FC','AI','CA','CV'];
+var HEAD_GK  =['GS','D','F','G','CC','CE','Chutes T','Chutes %','PC','PE','Passes T','Passes %','RC','RE','Reposicoes T','Reposicoes %','FS','FC','AI','CA','CV'];
 
 function statBlock(out,title,players,cols,head){
   out.push([title,'#','Jogador'].concat(head,['MIN','A/M']));
