@@ -11,5 +11,8 @@
   .card,.rep,.tw,.pitchwrap{box-shadow:none}
   .rep,.tw{border-color:#bbb}
   .rep .row{break-inside:avoid}
+  /* a parte por jogador começa em página nova e nenhum atleta fica cortado ao meio */
+  #secJog{break-before:page;page-break-before:always}
+  .pj{break-inside:avoid;page-break-inside:avoid;border-color:#bbb}
   h2.sec{margin:16px 0 8px}
 }

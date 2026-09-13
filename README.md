@@ -59,8 +59,11 @@ no próprio aparelho.
   local, analista e o escudo do time** — tudo isso vai para o cabeçalho do PDF,
   para o CSV e para o resumo em texto, com uma linha de assinatura no fim.
   A data é a **do jogo**, não a de hoje: reabrir uma partida de duas semanas
-  atrás e imprimir sai com a data certa.
-- **Comparação** — dois jogadores lado a lado.
+  atrás e imprimir sai com a data certa. No fim, **Por jogador**: um bloco para
+  cada atleta com os números dele por extenso (gols, passes certos, precisão de
+  chute...), que no PDF sai em página própria e serve para mandar a cada um a
+  parte que lhe cabe.
+- **Comparação** — dois jogadores lado a lado, com a legenda dos códigos embaixo.
 - **Temporada** — soma todas as partidas do scout: vitórias, empates e derrotas,
   gols por jogo, e a tabela por atleta com jogos, minutos, gols, assistências,
   aproveitamento de chute, ações por minuto e gols por jogo, ordenada por gols.
@@ -75,8 +78,8 @@ no próprio aparelho.
 *Adicionar à Tela de Início* (iPad) ou *Instalar* (Chrome). Depois disso abre em
 tela cheia e funciona sem sinal — um service worker guarda o app no aparelho.
 
-O **PDF sai inteiro** — relatório, estatísticas por jogador e campograma, cada
-bloco em sua página.
+O **PDF sai inteiro** — relatório, blocos por jogador, estatísticas e campograma,
+cada parte em sua página.
 
 **Sem depender do navegador:** na aba **Dados**, botão *Baixar o app (.html)*.
 Sai um arquivo único com o app inteiro dentro; guarde no aparelho e abra com dois

@@ -8,3 +8,17 @@
 .rep .row .a{text-align:right}.rep .row .b{text-align:left}
 .rep .v{font-family:var(--num);font-size:20px;font-weight:700}
 .rep .row.head{background:var(--surface-2)}
+
+/* relatório por jogador: um bloco por atleta, número grande e nome por extenso embaixo */
+.pjs{display:grid;gap:10px}
+.pj{background:var(--surface);border:1px solid var(--line-soft);border-radius:var(--r);padding:12px 14px}
+.pjhead{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;margin-bottom:8px}
+.pjhead .num{font-family:var(--num);font-weight:700;font-size:18px}
+.pjhead .nome{font-weight:700;font-size:16px}
+.pjhead .pos,.pjhead .min{font-size:12px;color:var(--muted)}
+.pjhead .min{margin-left:auto}
+.pjgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(118px,1fr));gap:4px 12px}
+.pjgrid .it{display:flex;flex-direction:column;padding:6px 0;border-top:1px solid var(--line-soft)}
+.pjgrid .it .v{font-family:var(--num);font-weight:700;font-size:17px;font-variant-numeric:tabular-nums}
+.pjgrid .it .l{font-size:11px;color:var(--muted);line-height:1.25}
+.pjgrid .it.z .v{color:var(--muted)}

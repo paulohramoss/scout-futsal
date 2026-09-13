@@ -154,6 +154,9 @@
     <h2 class="sec">Botões livres</h2>
     <div class="tw"><table id="tblFree"></table></div>
 
+    <h2 class="sec" id="secJog">Por jogador</h2>
+    <div class="pjs" id="pjBox"></div>
+
     <div class="printonly assina" id="printFoot"></div>
   </section>
 
@@ -164,6 +167,8 @@
       <select id="cmpA"></select><span class="hint">×</span><select id="cmpB"></select>
     </div>
     <div class="cmp" id="cmpBox"></div>
+    <h2 class="sec">Legenda</h2>
+    <div class="legend" id="legendCmp"></div>
   </section>
 
   <!-- ============ TEMPORADA ============ -->
@@ -1351,6 +1356,15 @@ $('#clearShots').addEventListener('click',function(){
 /* ---------- estatísticas ---------- */
 var COLS_LINE=['G','A','PC','PE','T','%','CC','CE','T','%','DE','DO','FS','FC','CA','CV'];
 var COLS_GK  =['GS','D','F','G','CC','CE','T','%','PC','PE','T','%','RC','RE','T','%','FS','FC','AI','CA','CV'];
+/* o mesmo, por extenso e na mesma ordem: é o que sai no bloco por jogador do relatório,
+   que chega a quem nunca viu a tabela de códigos */
+var NOME_LINE=['Gols','Assistências','Passes certos','Passes errados','Passes (total)','Precisão de passe',
+  'Chutes certos','Chutes errados','Chutes (total)','Precisão de chute','Desarmes','Desarmado',
+  'Faltas sofridas','Faltas cometidas','Cartão amarelo','Cartão vermelho'];
+var NOME_GK  =['Gols sofridos','Defesas','Chutes do adv. fora','Gols','Chutes certos','Chutes errados',
+  'Chutes (total)','Precisão de chute','Passes certos','Passes errados','Passes (total)','Precisão de passe',
+  'Reposições certas','Reposições erradas','Reposições (total)','Precisão de reposição',
+  'Faltas sofridas','Faltas cometidas','Ações individuais','Cartão amarelo','Cartão vermelho'];
 
 /* T e % de chute incluem o gol: gol é finalização no alvo.
    Assim o scout toca só "G" quando sai gol, sem precisar tocar CC junto. */
@@ -1512,6 +1526,42 @@ function renderReport(){
     tb.appendChild(r);
   });
   t.appendChild(tb);
+  renderPorJogador();
+}
+/* Um bloco por jogador, cada número com o nome por extenso: o relatório circula no
+   grupo do time, e o atleta lê a parte dele sem precisar da legenda. */
+function renderPorJogador(){
+  var box=$('#pjBox'); box.textContent='';
+  S.players.forEach(function(p){
+    var cols=p.gk?COLS_GK:COLS_LINE, nomes=p.gk?NOME_GK:NOME_LINE;
+    var v=rowVals(p), ex=extrasDe(p);
+    var card=el('div','pj'), head=el('div','pjhead');
+    head.appendChild(el('span','num',String(p.num)));
+    head.appendChild(el('span','nome',p.name));
+    head.appendChild(el('span','pos',p.gk?'Goleiro':'Linha'));
+    head.appendChild(el('span','min',ex[0]
+      ? fmt(ex[0])+' em quadra · '+ex[1].toFixed(1)+' ações/min'
+      : 'tempo em quadra não registrado'));
+    card.appendChild(head);
+    var grid=el('div','pjgrid');
+    function item(valor,nome,zero){
+      var it=el('div','it'+(zero?' z':''));
+      it.appendChild(el('span','v',valor));
+      it.appendChild(el('span','l',nome));
+      grid.appendChild(it);
+    }
+    v.forEach(function(x,i){
+      var isPct=cols[i]==='%';
+      item(isPct?(x?x.toFixed(1)+'%':'—'):String(x), nomes[i], !x);
+    });
+    /* botão livre só entra se o jogador marcou: senão vira fileira de zero */
+    FREE.forEach(function(c){
+      var n=countF(p.id,c);
+      if(n) item(String(n), descr(c), false);
+    });
+    card.appendChild(grid);
+    box.appendChild(card);
+  });
 }
 
 /* ---------- identificação da partida ---------- */
@@ -1679,8 +1729,11 @@ function renderCompare(){
   fillSel(a,va); fillSel(b,vb);
   var pa=player(a.value), pb=player(b.value);
   var box=$('#cmpBox'); box.textContent='';
-  if(!pa||!pb) return;
+  if(!pa||!pb){ $('#legendCmp').innerHTML=''; return; }
   var cols = (pa.gk&&pb.gk)?COLS_GK:COLS_LINE;
+  /* quem recebe o comparativo não tem a aba Estatísticas do lado: a legenda vai junto,
+     só com os códigos que estão na tela */
+  $('#legendCmp').innerHTML=legendaDe(cols).join(' &nbsp;·&nbsp; ')+NOTA_LEGENDA;
   var va2=rowVals(pa), vb2=rowVals(pb);
   cols.forEach(function(c,i){
     var x=va2[i], y=vb2[i], max=Math.max(x,y,1);
@@ -1927,18 +1980,24 @@ $('#delPerfil').addEventListener('click',function(){
 });
 
 /* ---------- legenda ---------- */
-function renderLegend(){
+var NOTA_LEGENDA='<br><br>Precisão de passe = PC ÷ (PC+PE). Precisão de chute = (G+CC) ÷ (G+CC+CE): o gol já conta como '+
+  'finalização no alvo, então em gol você toca só <b>G</b>. Na planilha antiga o gol ficava fora dessa conta.';
+/* o mesmo código aparece nas duas tabelas (CC, PC, FS...); a legenda cita uma vez */
+function legendaDe(codigos){
   var parts=[], vistos={};
-  /* o mesmo código aparece nas duas tabelas (CC, PC, FS...); a legenda cita uma vez */
-  LINE.concat(GK).concat(TEAM).forEach(function(a){
-    if(vistos[a.c]) return;
-    vistos[a.c]=1; parts.push('<b>'+a.c+'</b> '+a.d);
+  codigos.forEach(function(c){
+    if(vistos[c]) return;
+    vistos[c]=1;
+    if(c==='T') parts.push('<b>T</b> Total');
+    else if(c==='%') parts.push('<b>%</b> Precisão');
+    else if(DESC[c]) parts.push('<b>'+c+'</b> '+DESC[c]);
   });
-  parts.push('<b>T</b> Total · <b>%</b> Precisão');
+  return parts;
+}
+function renderLegend(){
+  var parts=legendaDe(LINE.concat(GK).concat(TEAM).map(function(a){return a.c;}).concat(['T','%']));
   S.freeLabels.forEach(function(l,i){parts.push('<b>'+sigla(FREE[i])+'</b> '+l);});
-  $('#legend').innerHTML=parts.join(' &nbsp;·&nbsp; ')+
-    '<br><br>Precisão de passe = PC ÷ (PC+PE). Precisão de chute = (G+CC) ÷ (G+CC+CE): o gol já conta como '+
-    'finalização no alvo, então em gol você toca só <b>G</b>. Na planilha antiga o gol ficava fora dessa conta.';
+  $('#legend').innerHTML=parts.join(' &nbsp;·&nbsp; ')+NOTA_LEGENDA;
 }
 
 /* ---------- export / import ---------- */
