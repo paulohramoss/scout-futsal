@@ -59,8 +59,11 @@ no próprio aparelho.
   local, analista e o escudo do time** — tudo isso vai para o cabeçalho do PDF,
   para o CSV e para o resumo em texto, com uma linha de assinatura no fim.
   A data é a **do jogo**, não a de hoje: reabrir uma partida de duas semanas
-  atrás e imprimir sai com a data certa.
-- **Comparação** — dois jogadores lado a lado.
+  atrás e imprimir sai com a data certa. No fim, **Por jogador**: um bloco para
+  cada atleta com os números dele por extenso (gols, passes certos, precisão de
+  chute...), que no PDF sai em página própria e serve para mandar a cada um a
+  parte que lhe cabe.
+- **Comparação** — dois jogadores lado a lado, com a legenda dos códigos embaixo.
 - **Temporada** — soma todas as partidas do scout: vitórias, empates e derrotas,
   gols por jogo, e a tabela por atleta com jogos, minutos, gols, assistências,
   aproveitamento de chute, ações por minuto e gols por jogo, ordenada por gols.
@@ -75,8 +78,8 @@ no próprio aparelho.
 *Adicionar à Tela de Início* (iPad) ou *Instalar* (Chrome). Depois disso abre em
 tela cheia e funciona sem sinal — um service worker guarda o app no aparelho.
 
-O **PDF sai inteiro** — relatório, estatísticas por jogador e campograma, cada
-bloco em sua página.
+O **PDF sai inteiro** — relatório, blocos por jogador, estatísticas e campograma,
+cada parte em sua página.
 
 **Sem depender do navegador:** na aba **Dados**, botão *Baixar o app (.html)*.
 Sai um arquivo único com o app inteiro dentro; guarde no aparelho e abra com dois
@@ -112,9 +115,10 @@ este projeto não tem.
 
 | Arquivo | Para que serve |
 |---|---|
-| `scout-futsal.html` | **O fonte.** Corpo do artefato — sem `<html>`/`<head>`/`<body>`, que é o formato exigido pelo publicador de artefatos do Claude. Toda alteração no app é feita aqui. |
-| `index.html` | Gerado. A página completa que o Vercel serve e que você salva para usar offline. |
-| `build.py` | Gera `index.html` a partir de `scout-futsal.html`. |
+| `css/*.css` | **O estilo**, dividido por assunto (tema, quadra, tabelas, impressão...). É aqui — e só aqui — que se mexe em CSS. |
+| `scout-futsal.html` | **O fonte.** Markup e JavaScript. Não tem estilo dentro: no lugar do `<style>` há uma marca que o build troca pelo CSS montado. |
+| `index.html` | Gerado. A página completa e única — markup, JS e CSS embutido — que o Vercel serve e que você salva para usar offline. |
+| `build.py` | Monta `css/` no lugar da marca e gera `index.html`. |
 | `sw.js`, `manifest.webmanifest`, `icons/` | Fazem o link funcionar offline e instalar como app. |
 | `make-icons.py` | Redesenha os ícones (só precisa rodar se o ícone mudar). |
 | `vercel.json` | Impede o CDN de segurar versão velha do app e do service worker. |
@@ -125,9 +129,36 @@ este projeto não tem.
 python3 build.py
 ```
 
-Edite `scout-futsal.html`, rode o comando acima e faça o commit dos dois
-arquivos. `index.html` é gerado, mas **vai versionado** — é ele que o Vercel
-publica, e não existe passo de build no deploy.
+Edite `css/*.css` (estilo) ou `scout-futsal.html` (markup e JavaScript), rode o
+comando acima e faça o commit. `index.html` é gerado, mas **vai versionado** — é
+ele que o Vercel publica, e não existe passo de build no deploy.
+
+O CSS existe num lugar só: `css/`. O fonte não guarda estilo nenhum — tem
+apenas esta linha, que o build troca pelo `<style>` pronto:
+
+```html
+<!-- estilo: montado por build.py a partir de css/ -->
+```
+
+Some essa linha, ou aparece duas vezes, e o build para com erro em vez de gerar
+página sem estilo.
+
+O CSS fica separado para trabalhar, mas volta **embutido** na página gerada.
+Folha de estilo à parte quebraria duas coisas deste app: o `index.html` salvo
+sozinho no aparelho ficaria sem estilo, e o service worker serve tudo que não é
+HTML pelo cache — depois de um deploy você abriria o app com markup novo e
+estilo velho, justo na quadra.
+
+A versão carimbada sai do corpo **já montado**, com o CSS dentro. Por isso
+trocar uma cor gera versão nova e o aparelho pega a atualização; se o hash
+saísse só do fonte, mudança de CSS passaria despercebida pelo cache.
+
+A ordem dos arquivos em `css/` é a ordem das regras na página, e em CSS ordem
+decide empate. Por isso o nome começa com número (`05-quadra.css`), e o build
+**recusa** arquivo fora do padrão `NN-nome.css` em vez de chutar a posição.
+Some a pasta, fica vazia ou aparece nome torto: o build para com erro e não
+gera nada — app sem estilo no aparelho é o tipo de coisa que só se descobre no
+jogo.
 
 ## Fluxo de trabalho
 
@@ -142,7 +173,7 @@ Todo push gera deploy sozinho. Trabalhe sempre na `staging`:
 
 ```bash
 git checkout staging
-# edita scout-futsal.html, roda python3 build.py
+# edita css/*.css ou scout-futsal.html, roda python3 build.py
 git add -A && git commit -m "..."
 git push
 ```

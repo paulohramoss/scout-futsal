@@ -9,7 +9,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Scout Futsal">
-<meta name="sf-versao" content="ee920e89">
+<meta name="sf-versao" content="cc8895b8">
 <link rel="manifest" href="./manifest.webmanifest">
 <link rel="icon" href="./icons/icon-192.png">
 <link rel="apple-touch-icon" href="./icons/icon-180.png">
@@ -18,6 +18,8 @@
 <body>
 <title>Futsal Scouting</title>
 <style>
+  /* gerado por build.py a partir de css/ - nao edite aqui */
+
   :root{
     --paper:#EDF0EE; --surface:#FFFFFF; --surface-2:#F5F7F5;
     --ink:#0C1618; --muted:#5A6B6C; --line:#D2DAD8; --line-soft:#E3E9E7;
@@ -267,6 +269,20 @@
   .rep .v{font-family:var(--num);font-size:20px;font-weight:700}
   .rep .row.head{background:var(--surface-2)}
 
+  /* relatório por jogador: um bloco por atleta, número grande e nome por extenso embaixo */
+  .pjs{display:grid;gap:10px}
+  .pj{background:var(--surface);border:1px solid var(--line-soft);border-radius:var(--r);padding:12px 14px}
+  .pjhead{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;margin-bottom:8px}
+  .pjhead .num{font-family:var(--num);font-weight:700;font-size:18px}
+  .pjhead .nome{font-weight:700;font-size:16px}
+  .pjhead .pos,.pjhead .min{font-size:12px;color:var(--muted)}
+  .pjhead .min{margin-left:auto}
+  .pjgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(118px,1fr));gap:4px 12px}
+  .pjgrid .it{display:flex;flex-direction:column;padding:6px 0;border-top:1px solid var(--line-soft)}
+  .pjgrid .it .v{font-family:var(--num);font-weight:700;font-size:17px;font-variant-numeric:tabular-nums}
+  .pjgrid .it .l{font-size:11px;color:var(--muted);line-height:1.25}
+  .pjgrid .it.z .v{color:var(--muted)}
+
   /* ---------- pitch ---------- */
   .pitchwrap{background:var(--surface);border:1px solid var(--line-soft);border-radius:var(--r);
     padding:10px;box-shadow:var(--shadow)}
@@ -401,6 +417,9 @@
     .card,.rep,.tw,.pitchwrap{box-shadow:none}
     .rep,.tw{border-color:#bbb}
     .rep .row{break-inside:avoid}
+    /* a parte por jogador começa em página nova e nenhum atleta fica cortado ao meio */
+    #secJog{break-before:page;page-break-before:always}
+    .pj{break-inside:avoid;page-break-inside:avoid;border-color:#bbb}
     h2.sec{margin:16px 0 8px}
   }
 </style>
@@ -558,6 +577,9 @@
     <h2 class="sec">Botões livres</h2>
     <div class="tw"><table id="tblFree"></table></div>
 
+    <h2 class="sec" id="secJog">Por jogador</h2>
+    <div class="pjs" id="pjBox"></div>
+
     <div class="printonly assina" id="printFoot"></div>
   </section>
 
@@ -568,6 +590,8 @@
       <select id="cmpA"></select><span class="hint">×</span><select id="cmpB"></select>
     </div>
     <div class="cmp" id="cmpBox"></div>
+    <h2 class="sec">Legenda</h2>
+    <div class="legend" id="legendCmp"></div>
   </section>
 
   <!-- ============ TEMPORADA ============ -->
@@ -1755,6 +1779,15 @@ $('#clearShots').addEventListener('click',function(){
 /* ---------- estatísticas ---------- */
 var COLS_LINE=['G','A','PC','PE','T','%','CC','CE','T','%','DE','DO','FS','FC','CA','CV'];
 var COLS_GK  =['GS','D','F','G','CC','CE','T','%','PC','PE','T','%','RC','RE','T','%','FS','FC','AI','CA','CV'];
+/* o mesmo, por extenso e na mesma ordem: é o que sai no bloco por jogador do relatório,
+   que chega a quem nunca viu a tabela de códigos */
+var NOME_LINE=['Gols','Assistências','Passes certos','Passes errados','Passes (total)','Precisão de passe',
+  'Chutes certos','Chutes errados','Chutes (total)','Precisão de chute','Desarmes','Desarmado',
+  'Faltas sofridas','Faltas cometidas','Cartão amarelo','Cartão vermelho'];
+var NOME_GK  =['Gols sofridos','Defesas','Chutes do adv. fora','Gols','Chutes certos','Chutes errados',
+  'Chutes (total)','Precisão de chute','Passes certos','Passes errados','Passes (total)','Precisão de passe',
+  'Reposições certas','Reposições erradas','Reposições (total)','Precisão de reposição',
+  'Faltas sofridas','Faltas cometidas','Ações individuais','Cartão amarelo','Cartão vermelho'];
 
 /* T e % de chute incluem o gol: gol é finalização no alvo.
    Assim o scout toca só "G" quando sai gol, sem precisar tocar CC junto. */
@@ -1916,6 +1949,42 @@ function renderReport(){
     tb.appendChild(r);
   });
   t.appendChild(tb);
+  renderPorJogador();
+}
+/* Um bloco por jogador, cada número com o nome por extenso: o relatório circula no
+   grupo do time, e o atleta lê a parte dele sem precisar da legenda. */
+function renderPorJogador(){
+  var box=$('#pjBox'); box.textContent='';
+  S.players.forEach(function(p){
+    var cols=p.gk?COLS_GK:COLS_LINE, nomes=p.gk?NOME_GK:NOME_LINE;
+    var v=rowVals(p), ex=extrasDe(p);
+    var card=el('div','pj'), head=el('div','pjhead');
+    head.appendChild(el('span','num',String(p.num)));
+    head.appendChild(el('span','nome',p.name));
+    head.appendChild(el('span','pos',p.gk?'Goleiro':'Linha'));
+    head.appendChild(el('span','min',ex[0]
+      ? fmt(ex[0])+' em quadra · '+ex[1].toFixed(1)+' ações/min'
+      : 'tempo em quadra não registrado'));
+    card.appendChild(head);
+    var grid=el('div','pjgrid');
+    function item(valor,nome,zero){
+      var it=el('div','it'+(zero?' z':''));
+      it.appendChild(el('span','v',valor));
+      it.appendChild(el('span','l',nome));
+      grid.appendChild(it);
+    }
+    v.forEach(function(x,i){
+      var isPct=cols[i]==='%';
+      item(isPct?(x?x.toFixed(1)+'%':'—'):String(x), nomes[i], !x);
+    });
+    /* botão livre só entra se o jogador marcou: senão vira fileira de zero */
+    FREE.forEach(function(c){
+      var n=countF(p.id,c);
+      if(n) item(String(n), descr(c), false);
+    });
+    card.appendChild(grid);
+    box.appendChild(card);
+  });
 }
 
 /* ---------- identificação da partida ---------- */
@@ -2083,8 +2152,11 @@ function renderCompare(){
   fillSel(a,va); fillSel(b,vb);
   var pa=player(a.value), pb=player(b.value);
   var box=$('#cmpBox'); box.textContent='';
-  if(!pa||!pb) return;
+  if(!pa||!pb){ $('#legendCmp').innerHTML=''; return; }
   var cols = (pa.gk&&pb.gk)?COLS_GK:COLS_LINE;
+  /* quem recebe o comparativo não tem a aba Estatísticas do lado: a legenda vai junto,
+     só com os códigos que estão na tela */
+  $('#legendCmp').innerHTML=legendaDe(cols).join(' &nbsp;·&nbsp; ')+NOTA_LEGENDA;
   var va2=rowVals(pa), vb2=rowVals(pb);
   cols.forEach(function(c,i){
     var x=va2[i], y=vb2[i], max=Math.max(x,y,1);
@@ -2331,18 +2403,24 @@ $('#delPerfil').addEventListener('click',function(){
 });
 
 /* ---------- legenda ---------- */
-function renderLegend(){
+var NOTA_LEGENDA='<br><br>Precisão de passe = PC ÷ (PC+PE). Precisão de chute = (G+CC) ÷ (G+CC+CE): o gol já conta como '+
+  'finalização no alvo, então em gol você toca só <b>G</b>. Na planilha antiga o gol ficava fora dessa conta.';
+/* o mesmo código aparece nas duas tabelas (CC, PC, FS...); a legenda cita uma vez */
+function legendaDe(codigos){
   var parts=[], vistos={};
-  /* o mesmo código aparece nas duas tabelas (CC, PC, FS...); a legenda cita uma vez */
-  LINE.concat(GK).concat(TEAM).forEach(function(a){
-    if(vistos[a.c]) return;
-    vistos[a.c]=1; parts.push('<b>'+a.c+'</b> '+a.d);
+  codigos.forEach(function(c){
+    if(vistos[c]) return;
+    vistos[c]=1;
+    if(c==='T') parts.push('<b>T</b> Total');
+    else if(c==='%') parts.push('<b>%</b> Precisão');
+    else if(DESC[c]) parts.push('<b>'+c+'</b> '+DESC[c]);
   });
-  parts.push('<b>T</b> Total · <b>%</b> Precisão');
+  return parts;
+}
+function renderLegend(){
+  var parts=legendaDe(LINE.concat(GK).concat(TEAM).map(function(a){return a.c;}).concat(['T','%']));
   S.freeLabels.forEach(function(l,i){parts.push('<b>'+sigla(FREE[i])+'</b> '+l);});
-  $('#legend').innerHTML=parts.join(' &nbsp;·&nbsp; ')+
-    '<br><br>Precisão de passe = PC ÷ (PC+PE). Precisão de chute = (G+CC) ÷ (G+CC+CE): o gol já conta como '+
-    'finalização no alvo, então em gol você toca só <b>G</b>. Na planilha antiga o gol ficava fora dessa conta.';
+  $('#legend').innerHTML=parts.join(' &nbsp;·&nbsp; ')+NOTA_LEGENDA;
 }
 
 /* ---------- export / import ---------- */

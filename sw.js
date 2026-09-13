@@ -10,7 +10,7 @@
    O nome do cache carrega o carimbo do build (build.py reescreve a linha
    abaixo a cada geracao), entao versao nova = cache novo, e o antigo e apagado
    no activate. */
-var CACHE = 'scout-futsal-ee920e89';
+var CACHE = 'scout-futsal-cc8895b8';
 var ASSETS = [
   './',
   './index.html',

@@ -1,0 +1,21 @@
+/* ---------- roster chips ---------- */
+.roster{display:flex;flex-wrap:wrap;gap:6px;padding:10px 2px;
+  position:sticky;top:calc(var(--tabtop,61px) + 45px);background:var(--paper);z-index:28}
+.pchip{
+  flex:0 0 auto;display:flex;align-items:center;gap:8px;padding:8px 14px 8px 8px;
+  background:var(--surface);border:1px solid var(--line);border-radius:999px;cursor:pointer;
+}
+.pchip .n{font-family:var(--num);font-weight:700;font-size:15px;background:var(--surface-2);
+  border-radius:999px;width:30px;height:30px;display:grid;place-items:center}
+.pchip .nm{font-size:14px;font-weight:600;max-width:130px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.pchip.gk .n{background:var(--amarelo);color:#fff}
+.pchip[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.pchip[aria-pressed="true"] .n{background:rgba(255,255,255,.22);color:inherit}
+.pchip[aria-pressed="true"].gk .n{background:var(--amarelo);color:#12100a}
+
+/* tela estreita (iPad em pé, celular): chip menor para caber mais por linha */
+@media (max-width:760px){
+  .pchip{padding:6px 11px 6px 6px;gap:6px}
+  .pchip .n{width:26px;height:26px;font-size:14px}
+  .pchip .nm{max-width:88px;font-size:13px}
+}

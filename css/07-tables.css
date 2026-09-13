@@ -1,0 +1,11 @@
+/* ---------- tables ---------- */
+.tw{overflow-x:auto;border-radius:var(--r);border:1px solid var(--line-soft);background:var(--surface)}
+table{border-collapse:collapse;width:100%;font-size:13.5px}
+th,td{padding:8px 9px;text-align:right;white-space:nowrap;border-bottom:1px solid var(--line-soft)}
+th{font-size:10.5px;letter-spacing:.09em;text-transform:uppercase;color:var(--muted);
+  font-weight:700;position:sticky;top:0;background:var(--surface-2)}
+td.l,th.l{text-align:left}
+tbody tr:last-child td{border-bottom:0}
+tr.tot td{font-weight:700;background:var(--surface-2)}
+td.num,th.num{font-family:var(--num);font-variant-numeric:tabular-nums}
+td.z{color:var(--muted)}

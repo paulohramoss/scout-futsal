@@ -1,17 +1,30 @@
 #!/usr/bin/env python3
 """Gera a pagina publicavel a partir do fonte do artefato.
 
-scout-futsal.html -> corpo do artefato (sem <html>/<head>/<body>, que e o
-                     formato exigido por quem publica o artefato no Claude)
-index.html        -> mesma coisa dentro de uma pagina HTML completa. E o que
-                     o Vercel serve no link, e tambem o arquivo que voce salva
-                     no aparelho para usar sem internet.
+css/*.css         -> o estilo, dividido por assunto. E AQUI que se mexe em CSS.
+scout-futsal.html -> markup e JavaScript, escritos na mao. Nao tem estilo
+                     nenhum dentro: no lugar do <style> ha uma marca que este
+                     script troca pelo CSS montado.
+index.html        -> a pagina completa e unica: markup, JS e o CSS embutido.
+                     E o que o Vercel serve no link, e tambem o arquivo que
+                     voce salva no aparelho para usar sem internet.
+
+O CSS fica em arquivo separado para trabalhar, mas volta embutido na pagina:
+o app tem que abrir de file://, salvo como arquivo unico e sem sinal, e o
+service worker serve tudo que nao e HTML pelo cache — folha de estilo a parte
+daria markup novo com estilo velho depois de um deploy.
+
+A ordem dos arquivos em css/ e a ordem das regras na pagina, e em CSS ordem
+decide empate. Por isso o nome comeca com numero e este script recusa arquivo
+fora do padrao NN-nome.css em vez de adivinhar a posicao.
 
 Cada geracao carimba uma versao (hash do corpo do app) no index.html e no
 nome do cache do service worker. E o carimbo que faz o aparelho perceber que
-saiu versao nova e trocar sozinho.
+saiu versao nova e trocar sozinho. O hash sai do corpo JA MONTADO, com o CSS
+dentro: se saisse so do fonte, mexer numa cor nao mudaria a versao e o
+aparelho continuaria servindo o estilo velho do cache.
 
-Rode `python3 build.py` sempre que mexer em scout-futsal.html.
+Rode `python3 build.py` sempre que mexer em css/ ou em scout-futsal.html.
 """
 import hashlib
 import io
@@ -22,6 +35,13 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 SRC = os.path.join(HERE, "scout-futsal.html")
 OUT = os.path.join(HERE, "index.html")
 SW = os.path.join(HERE, "sw.js")
+CSS_DIR = os.path.join(HERE, "css")
+
+# A linha que o fonte guarda no lugar do estilo. Tem que bater exatamente.
+MARCA_CSS = "<!-- estilo: montado por build.py a partir de css/ -->"
+# Aviso que vai no <style> gerado, para quem abrir o index.html procurando CSS.
+AVISO_CSS = "/* gerado por build.py a partir de css/ - nao edite aqui */"
+NOME_CSS = re.compile(r"^\d\d-[a-z0-9-]+\.css$")
 
 HEAD = """<!doctype html>
 <html lang="pt-BR">
@@ -101,6 +121,41 @@ FOOT = """
 """
 
 
+def indenta(txt):
+    """Duas casas, como o resto do <style>. Linha em branco fica em branco."""
+    return "\n".join(("  " + l) if l.strip() else "" for l in txt.split("\n"))
+
+
+def monta_css():
+    """Junta css/*.css na ordem do nome. Falha alto: um erro aqui viraria app
+    sem estilo nenhum no aparelho, e isso so aparece na hora do jogo."""
+    if not os.path.isdir(CSS_DIR):
+        raise SystemExit("build: falta a pasta css/ — o estilo mora la")
+    arqs = sorted(f for f in os.listdir(CSS_DIR) if f.endswith(".css"))
+    if not arqs:
+        raise SystemExit("build: css/ esta vazia")
+    fora = [f for f in arqs if not NOME_CSS.match(f)]
+    if fora:
+        raise SystemExit("build: nome fora do padrao NN-nome.css em css/: "
+                         + ", ".join(fora))
+    blocos = []
+    for f in arqs:
+        txt = io.open(os.path.join(CSS_DIR, f), encoding="utf-8").read().strip("\n")
+        if txt:
+            blocos.append(indenta(txt))
+    return "\n\n".join(blocos), arqs
+
+
+def injeta_css(body, css):
+    """Troca a marca do fonte pelo <style> montado."""
+    if body.count(MARCA_CSS) != 1:
+        raise SystemExit("build: esperava exatamente uma marca de estilo em "
+                         "scout-futsal.html, achei %d.\n       linha esperada: %s"
+                         % (body.count(MARCA_CSS), MARCA_CSS))
+    bloco = "<style>\n  " + AVISO_CSS + "\n\n" + css + "\n</style>"
+    return body.replace(MARCA_CSS, bloco)
+
+
 def carimba_sw(versao):
     """Poe a versao no nome do cache: cache novo a cada build."""
     sw = io.open(SW, encoding="utf-8").read()
@@ -112,11 +167,14 @@ def carimba_sw(versao):
 
 
 def main():
-    body = io.open(SRC, encoding="utf-8").read().strip()
+    fonte = io.open(SRC, encoding="utf-8").read().strip()
+    css, arqs = monta_css()
+    body = injeta_css(fonte, css)
     versao = hashlib.sha1(body.encode("utf-8")).hexdigest()[:8]
     io.open(OUT, "w", encoding="utf-8").write(
         HEAD.format(versao=versao) + body + FOOT)
     mexeu = carimba_sw(versao)
+    print("css:", len(arqs), "arquivos ->", css.count("\n") + 1, "linhas embutidas")
     print("gerado:", OUT, os.path.getsize(OUT), "bytes")
     print("versao:", versao, "(sw.js atualizado)" if mexeu else "(sw.js ja estava nesta versao)")
 

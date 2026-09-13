@@ -14,15 +14,30 @@ meio do jogo: **erro em produção custa dado de jogo perdido**, e não existe
 
 | Arquivo | O que é |
 |---|---|
-| `scout-futsal.html` | **O fonte.** Corpo do artefato: `<style>`, markup e um `<script>` com toda a lógica dentro de uma IIFE. Toda alteração de app é feita aqui. |
-| `index.html` | **Gerado.** `python build.py` = HEAD + fonte + FOOT (registro do service worker). Vai versionado: é o que o Vercel serve. |
-| `build.py` | Gera o `index.html` e carimba a versão (sha1 do fonte) no `<meta name="sf-versao">` e no nome do cache do `sw.js`. |
+| `css/*.css` | **O estilo**, um arquivo por assunto, na ordem do prefixo numérico. Toda mudança de CSS é feita aqui, e só aqui. |
+| `scout-futsal.html` | **O fonte.** Markup e um `<script>` com toda a lógica dentro de uma IIFE. **Não tem `<style>`**: no lugar dele há a marca `<!-- estilo: montado por build.py a partir de css/ -->`, que o build troca pelo CSS montado. |
+| `index.html` | **Gerado.** `python3 build.py` = HEAD + fonte + FOOT (registro do service worker). Vai versionado: é o que o Vercel serve. |
+| `build.py` | Monta `css/` no lugar da marca, gera o `index.html` e carimba a versão (sha1 do corpo **já montado**, CSS incluído) no `<meta name="sf-versao">` e no nome do cache do `sw.js`. |
 | `sw.js` | Service worker. HTML de rede primeiro, resto do cache. Nome do cache carimbado pelo build. |
 | `vercel.json` | Sem cache de CDN em `sw.js`, `index.html` e manifest. |
 | `README.md` | Documentação do usuário e a tabela de códigos do scout. Mudou código de ação, muda o README. |
 
-**Nunca edite `index.html` na mão.** Edite o fonte e rode `python build.py`
-(neste ambiente o comando é `python`, não `python3`). Commite os dois.
+**Nunca edite `index.html` na mão** — é gerado, o build sobrescreve. Estilo vai
+em `css/*.css`; markup e JS, no fonte. Depois rode `python3 build.py` e commite
+tudo. O `build.py` **não escreve mais no fonte**: `scout-futsal.html` voltou a
+ser um arquivo só de mão.
+
+O CSS mora em arquivo separado só para trabalhar: ele volta **embutido** na
+página gerada. Nada de `<link rel="stylesheet">` — o `index.html` é salvo
+sozinho no aparelho para uso offline, e o `sw.js` serve tudo que não é HTML pelo
+cache (markup novo + estilo velho depois do deploy). O nome `NN-nome.css` fixa a
+ordem das regras; o build recusa nome fora do padrão, e aborta se `css/` sumir,
+estiver vazia ou se a marca do estilo faltar/duplicar no fonte — em vez de gerar
+um app sem estilo.
+
+O carimbo de versão sai do corpo **montado**. Isso não é detalhe: se o hash
+saísse só do fonte, mexer numa cor não mudaria a versão, o nome do cache do
+`sw.js` continuaria igual e o iPad serviria o estilo velho.
 
 ## Estilo de código (não negocie com isto)
 
@@ -44,7 +59,9 @@ meio do jogo: **erro em produção custa dado de jogo perdido**, e não existe
 - **Tema por variável CSS.** Nada de cor literal em regra nova: use
   `var(--accent)`, `var(--neg)`, `var(--muted)`... Existem quatro blocos de
   tema (claro, escuro por `prefers-color-scheme`, e os dois forçados por
-  `[data-theme]`) — cor nova entra nos quatro.
+  `[data-theme]`), todos em `css/01-tema.css` — cor nova entra nos quatro.
+  Confira o nome da variável antes: `--surface-2` tem hífen, e `var(--surface2)`
+  não avisa, só não pinta. O teste de CSS pega isso.
 - **Botão é `<button type="button">`** com `aria-pressed` quando tem estado.
   Alvo de toque grande: isso é usado com o dedo, em pé, na beira da quadra.
 
@@ -100,7 +117,7 @@ O fonte é um arquivo só, grande. Editar às cegas quebra. O padrão do projeto
 2. Escreva um script Python de patch com pares (trecho antigo, trecho novo)
    **exatos**, e antes de aplicar verifique `s.count(old) == 1` — âncora
    ambígua ou sumida aborta o patch inteiro em vez de corromper o arquivo.
-3. Rode, depois `python build.py`.
+3. Rode, depois `python3 build.py`.
 4. Confira a sintaxe: extraia o `<script>` e passe `node --check`.
 
 Patch em pedaço pequeno é melhor que um gigante: âncora quebrada em patch de 20
@@ -167,7 +184,11 @@ Diga isso no relatório em vez de dar por testado.
       em `ABAS`)?
 - [ ] Mutação termina em `save()`?
 - [ ] Mexeu em `PERF`? Restaurou?
-- [ ] Cor nova saiu de variável de tema? Ficou legível no claro e no escuro?
+- [ ] Cor nova saiu de variável de tema, definida nos **quatro** blocos de
+      `css/01-tema.css`? Ficou legível no claro e no escuro?
+- [ ] Regra de estilo entrou em `css/`? (O fonte não tem mais `<style>` — se
+      você escreveu CSS lá, está no lugar errado.) Arquivo novo em `css/` segue
+      `NN-nome.css`, com o número dizendo a ordem?
 - [ ] Elemento novo que não deve sair no PDF entrou na regra `@media print`?
 - [ ] O PDF continua saindo inteiro? `imprime()` desconde relatório,
       estatísticas e campograma, imprime e devolve o estado das abas.
@@ -176,7 +197,8 @@ Diga isso no relatório em vez de dar por testado.
 - [ ] Texto de tela em português, com a mesma voz seca do resto (sem "ops!",
       sem exclamação).
 - [ ] `README.md` continua verdadeiro?
-- [ ] `python build.py` rodou e o `index.html` está no commit?
+- [ ] `python3 build.py` rodou, e `index.html` (mais `css/`, se mexeu no
+      estilo) está no commit?
 
 Achou problema: aponte arquivo e linha, diga o que quebra na prática ("com
 partida de antes de X, abre com a tabela desalinhada"), proponha a correção
@@ -204,7 +226,7 @@ o jogo, entra também em `ABAS_JOGO`.
 
 ```bash
 git checkout staging
-# edita scout-futsal.html, python build.py
+# edita css/*.css ou scout-futsal.html, python3 build.py
 git add -A && git commit
 git push                       # deploy automático na staging
 # aprovado no iPad:
